@@ -11,6 +11,13 @@ const RESUME_URL = './resume/Naresh-Singh-Bhau-Resume.pdf'
 
 const EASE = [0.16, 1, 0.3, 1] as const
 
+const NAV_LINKS = [
+  { label: 'Experience', target: 'experience' },
+  { label: 'Achievements', target: 'achievements' },
+  { label: 'Capabilities', target: 'capabilities' },
+  { label: 'Contact', target: 'contact' },
+] as const
+
 // ─── DATA ───
 const stats = [
   { label: 'Years in B2B Sales', value: '8+', icon: Briefcase },
@@ -146,9 +153,20 @@ function SectionHead({ title, lead }: { title: React.ReactNode; lead?: string })
 function Nav() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
+  const [active, setActive] = useState('')
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40)
+    const onScroll = () => {
+      setScrolled(window.scrollY > 40)
+      const threshold = window.innerHeight / 3.5
+      let current = ''
+      for (const l of NAV_LINKS) {
+        const el = document.getElementById(l.target)
+        if (el && el.getBoundingClientRect().top <= threshold) current = l.target
+      }
+      setActive(current)
+    }
+    onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
@@ -170,13 +188,6 @@ function Nav() {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
-  const links = [
-    { label: 'Experience', target: 'experience' },
-    { label: 'Achievements', target: 'achievements' },
-    { label: 'Capabilities', target: 'capabilities' },
-    { label: 'Contact', target: 'contact' },
-  ]
-
   return (
     <motion.header
       initial={{ y: -80, opacity: 0 }}
@@ -189,7 +200,7 @@ function Nav() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
         <button
           onClick={() => scrollTo('hero')}
-          className="flex items-center gap-3 group"
+          className="flex items-center gap-3 group rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           aria-label="Back to top"
         >
           <span className="w-9 h-9 rounded-lg bg-primary text-primary-foreground font-display font-bold text-sm flex items-center justify-center group-hover:-rotate-6 transition-transform">
@@ -202,14 +213,20 @@ function Nav() {
         </button>
 
         <nav className="hidden lg:flex items-center gap-8" aria-label="Primary">
-          {links.map((l) => (
+          {NAV_LINKS.map((l) => (
             <button
               key={l.target}
               onClick={() => scrollTo(l.target)}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors relative group"
+              className={`text-sm relative group transition-colors rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                active === l.target ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+              }`}
             >
               {l.label}
-              <span className="absolute -bottom-1 left-0 w-0 h-px bg-primary transition-all duration-300 group-hover:w-full" />
+              <span
+                className={`absolute -bottom-1 left-0 h-px bg-primary transition-all duration-300 ${
+                  active === l.target ? 'w-full' : 'w-0 group-hover:w-full'
+                }`}
+              />
             </button>
           ))}
         </nav>
@@ -225,7 +242,7 @@ function Nav() {
             aria-expanded={open}
             aria-controls="mobile-nav"
             aria-label="Menu"
-            className="lg:hidden w-10 h-10 inline-flex items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-muted-foreground hover:text-foreground transition-colors"
+            className="lg:hidden w-10 h-10 inline-flex items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -244,11 +261,15 @@ function Nav() {
             className="lg:hidden absolute top-full inset-x-0 mx-4 mt-2 rounded-2xl border border-white/10 bg-card/95 backdrop-blur-xl p-3"
             aria-label="Mobile"
           >
-            {links.map((l) => (
+            {NAV_LINKS.map((l) => (
               <button
                 key={l.target}
                 onClick={() => scrollTo(l.target)}
-                className="w-full text-left px-4 py-3 text-sm text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-lg transition-colors"
+                className={`w-full text-left px-4 py-3 text-sm rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 ${
+                  active === l.target
+                    ? 'text-foreground bg-white/5'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
+                }`}
               >
                 {l.label}
               </button>
@@ -346,17 +367,17 @@ function Hero() {
             transition={{ duration: 0.8, delay: 0.5 }}
             className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-sm text-muted-foreground"
           >
-            <a href="tel:+919901935806" className="inline-flex items-center gap-2 hover:text-foreground transition-colors">
+            <a href="tel:+919901935806" className="inline-flex items-center gap-2 hover:text-foreground transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background">
               <Phone className="w-4 h-4 text-primary" /> +91-9901 935 806
             </a>
-            <a href="mailto:nareshbhau1993@gmail.com" className="inline-flex items-center gap-2 hover:text-foreground transition-colors">
+            <a href="mailto:nareshbhau1993@gmail.com" className="inline-flex items-center gap-2 hover:text-foreground transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background">
               <Mail className="w-4 h-4 text-primary" /> nareshbhau1993@gmail.com
             </a>
             <a
               href="https://www.linkedin.com/in/nareshsinghbhau"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 hover:text-foreground transition-colors"
+              className="inline-flex items-center gap-2 hover:text-foreground transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               <Linkedin className="w-4 h-4 text-primary" /> LinkedIn
             </a>
@@ -390,7 +411,7 @@ function Hero() {
               href="https://www.linkedin.com/in/nareshsinghbhau"
               target="_blank"
               rel="noopener noreferrer"
-              className="border-t border-white/[0.07] px-6 py-4 flex items-center justify-between text-xs group/cert hover:bg-white/[0.02] transition-colors"
+              className="border-t border-white/[0.07] px-6 py-4 flex items-center justify-between text-xs group/cert hover:bg-white/[0.02] transition-colors rounded-b-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/50"
             >
               <span className="text-muted-foreground inline-flex items-center gap-1.5">
                 <BadgeCheck className="w-4 h-4 text-primary" /> Insight Alpha — Industry Expert
@@ -424,7 +445,7 @@ function Hero() {
 // ─── MARQUEE ───
 function Marquee() {
   const reduce = useReducedMotion()
-  const items = [...skillsMarquee, ...skillsMarquee]
+  const items = reduce ? skillsMarquee : [...skillsMarquee, ...skillsMarquee]
   return (
     <section className="border-y border-white/[0.07] py-5 overflow-hidden" aria-hidden>
       <div
@@ -667,7 +688,7 @@ function Achievements() {
   const [big, f2] = achievements.filter((a) => a.featured)
   const [r0, ...bottom] = achievements.filter((a) => !a.featured)
   return (
-    <section id="achievements" className="py-24 md:py-32 bg-white/[0.015] border-y border-white/[0.05]">
+    <section id="achievements" className="py-24 md:py-32 bg-white/[0.015] border-y border-white/[0.07]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionLabel num="03">Track Record</SectionLabel>
         <div className="mb-14">
@@ -841,17 +862,17 @@ function Contact() {
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-sm">
-            <a href="tel:+919901935806" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+            <a href="tel:+919901935806" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background">
               <Phone className="w-4 h-4 text-primary" /> +91-9901 935 806
             </a>
-            <a href="mailto:nareshbhau1993@gmail.com" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+            <a href="mailto:nareshbhau1993@gmail.com" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background">
               <Mail className="w-4 h-4 text-primary" /> nareshbhau1993@gmail.com
             </a>
             <a
               href="https://www.linkedin.com/in/nareshsinghbhau"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+              className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               <Linkedin className="w-4 h-4 text-primary" /> LinkedIn
             </a>
@@ -873,7 +894,7 @@ function Contact() {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.8 }}
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-6 right-6 w-11 h-11 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors z-50"
+          className="fixed bottom-6 right-6 w-11 h-11 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors z-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           aria-label="Back to top"
         >
           <ChevronUp className="w-5 h-5" />
