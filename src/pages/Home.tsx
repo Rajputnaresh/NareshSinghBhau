@@ -401,9 +401,9 @@ function About() {
         <div className="lg:sticky lg:top-28 self-start">
           <SectionLabel num="01">Profile</SectionLabel>
           <h2 className="font-display text-3xl md:text-4xl font-bold tracking-tight leading-[1.1]">
-            Revenue leader who ships growth,
+            The operator behind
             <br />
-            <span className="text-gradient">not just targets.</span>
+            the growth curve.
           </h2>
         </div>
 
@@ -431,7 +431,7 @@ function About() {
             className="pt-6 grid sm:grid-cols-3 gap-4"
           >
             {[
-              { k: '₹3.1 Cr+', v: 'annual revenue influenced', },
+              { k: '₹3 Cr+', v: 'monthly regional revenue managed' },
               { k: '2×', v: 'branch revenue growth (5 yrs)' },
               { k: '50+', v: 'sales professionals led' },
             ].map((m, i) => (
@@ -492,10 +492,9 @@ function Experience() {
   return (
     <section id="experience" className="py-24 md:py-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <SectionLabel num="02">Career Journey</SectionLabel>
         <SectionHead
-          title={<>Where the <span className="text-gradient italic">growth</span> happened</>}
-          lead="From structured direct sales to full regional P&L ownership — a proven track record of turning sales teams into revenue engines."
+          title={<>From direct sales to regional P&amp;L ownership.</>}
+          lead="A proven track record of turning sales teams into revenue engines — and sales leaders into managers."
         />
 
         <div className="relative">
@@ -520,7 +519,7 @@ function Experience() {
                   className="absolute left-5 md:left-1/2 -translate-x-1/2 top-1 w-3 h-3 rounded-full bg-primary ring-4 ring-background"
                   aria-hidden
                 />
-                <div className={i % 2 === 0 ? 'md:pr-16 md:text-right' : 'md:col-start-2 md:pl-16'}>
+                <div className={i % 2 === 0 ? 'pl-12 md:pl-0 md:pr-16 md:text-right' : 'pl-12 md:pl-16 md:col-start-2'}>
                   <span className="inline-flex items-center gap-2 font-mono text-xs tracking-[0.2em] text-primary mb-3">
                     {exp.index}
                     <span className="h-px w-8 bg-primary/40" />
@@ -537,7 +536,7 @@ function Experience() {
                   </p>
                 </div>
 
-                <div className={i % 2 === 0 ? 'md:col-start-2' : 'md:row-start-1 md:pr-16 md:text-right'}>
+                <div className={i % 2 === 0 ? 'pl-12 md:pl-0 md:col-start-2' : 'pl-12 md:pl-0 md:row-start-1 md:pr-16 md:text-right'}>
                   <ul className={`space-y-3 ${
                     i % 2 === 1 ? 'md:flex md:flex-col md:items-end' : ''
                   }`}>
@@ -566,65 +565,72 @@ function Experience() {
 }
 
 // ─── ACHIEVEMENTS (bento, asymmetric) ───
+function FeaturedTile({ a, large }: { a: (typeof achievements)[number]; large?: boolean }) {
+  return (
+    <motion.div
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, margin: '-80px' }}
+      variants={reveal}
+      className={`relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/15 to-transparent p-8 flex flex-col justify-end group ${
+        large ? 'md:col-span-2 md:row-span-2' : 'md:min-h-[168px]'
+      }`}
+    >
+      <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-primary/15 blur-[60px] group-hover:scale-150 transition-transform duration-700" aria-hidden />
+      <span className="w-11 h-11 rounded-xl bg-primary text-primary-foreground flex items-center justify-center mb-6">
+        <Sparkles className="w-5 h-5" />
+      </span>
+      <span className="inline-flex w-fit px-3 py-1 rounded-full bg-background/60 border border-white/10 text-[11px] text-muted-foreground uppercase tracking-wider mb-3">
+        {a.tag}
+      </span>
+      <h3 className={`font-display font-bold tracking-tight mb-2 ${large ? 'text-3xl md:text-4xl' : 'text-2xl'}`}>
+        {a.title}
+      </h3>
+      <p className="text-muted-foreground max-w-md leading-relaxed">{a.desc}</p>
+    </motion.div>
+  )
+}
+
+function SmallTile({ a }: { a: (typeof achievements)[number] }) {
+  return (
+    <motion.div
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, margin: '-80px' }}
+      variants={reveal}
+      className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6 flex items-start gap-4 group hover:border-primary/30 hover:bg-white/[0.04] transition-all"
+    >
+      <span className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
+        <BadgeCheck className="w-5 h-5" />
+      </span>
+      <div>
+        <div className="font-display text-xl font-bold tracking-tight mb-1">{a.title}</div>
+        <p className="text-sm text-muted-foreground leading-relaxed">{a.desc}</p>
+      </div>
+    </motion.div>
+  )
+}
+
 function Achievements() {
-  const featured = achievements.filter((a) => a.featured)
-  const rest = achievements.filter((a) => !a.featured)
+  const [big, f2] = achievements.filter((a) => a.featured)
+  const [r0, ...bottom] = achievements.filter((a) => !a.featured)
   return (
     <section id="achievements" className="py-24 md:py-32 bg-white/[0.015] border-y border-white/[0.05]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <SectionLabel num="03">Track Record</SectionLabel>
+        <SectionLabel num="02">Track Record</SectionLabel>
         <div className="mb-14">
           <h2 className="font-display text-3xl md:text-5xl font-bold tracking-tight leading-[1.08]">
-            Proof in the <span className="text-gradient italic">numbers</span>
+            Proof, not promises.
           </h2>
         </div>
 
         <div className="grid md:grid-cols-3 gap-4 md:gap-5">
-          {featured.map((a, i) => (
-            <motion.div
-              key={a.title}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, margin: '-80px' }}
-              custom={i}
-              variants={reveal}
-              className={`relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/15 to-transparent p-8 flex flex-col justify-end group ${
-                i === 0 ? 'md:col-span-2 md:row-span-2 md:min-h-[320px]' : 'md:min-h-[320px]'
-              }`}
-            >
-              <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-primary/15 blur-[60px] group-hover:scale-150 transition-transform duration-700" aria-hidden />
-              <span className="w-11 h-11 rounded-xl bg-primary text-primary-foreground flex items-center justify-center mb-6">
-                <Sparkles className="w-5 h-5" />
-              </span>
-              <span className="inline-flex w-fit px-3 py-1 rounded-full bg-background/60 border border-white/10 text-[11px] text-muted-foreground uppercase tracking-wider mb-3">
-                {a.tag}
-              </span>
-              <h3 className="font-display text-3xl md:text-4xl font-bold tracking-tight mb-2">{a.title}</h3>
-              <p className="text-muted-foreground max-w-md leading-relaxed">{a.desc}</p>
-            </motion.div>
+          <FeaturedTile a={big} large />
+          <FeaturedTile a={f2} />
+          <SmallTile a={r0} />
+          {bottom.map((a) => (
+            <SmallTile key={a.title} a={a} />
           ))}
-
-          <div className="grid gap-4 md:gap-5 md:row-span-2">
-            {rest.map((a, i) => (
-              <motion.div
-                key={a.title}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true, margin: '-80px' }}
-                custom={i}
-                variants={reveal}
-                className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6 flex items-start gap-4 group hover:border-primary/30 hover:bg-white/[0.04] transition-all"
-              >
-                <span className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-                  <BadgeCheck className="w-5 h-5" />
-                </span>
-                <div>
-                  <div className="font-display text-xl font-bold tracking-tight mb-1">{a.title}</div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{a.desc}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
         </div>
       </div>
     </section>
@@ -637,9 +643,8 @@ function Capabilities() {
     <section id="capabilities" className="py-24 md:py-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-[1fr_1.8fr] gap-12">
         <div className="lg:sticky lg:top-28 self-start">
-          <SectionLabel num="04">Capabilities</SectionLabel>
           <h2 className="font-display text-3xl md:text-4xl font-bold tracking-tight leading-[1.1] mb-6">
-            What I bring to a <span className="text-gradient italic">revenue team</span>
+            How I drive revenue — end to end.
           </h2>
           <p className="text-muted-foreground leading-relaxed max-w-sm">
             A full-stack sales-operating capability — from front-line deal execution to P&amp;L,
@@ -690,7 +695,7 @@ function IndustryExpert() {
             SELECTED INDUSTRY EXPERT · INSIGHT ALPHA
           </span>
           <h2 className="font-display text-3xl md:text-5xl font-bold tracking-tight leading-[1.08] mb-6">
-            Advisory voice on <span className="text-gradient italic">B2B SaaS & revenue</span>
+            Selected to advise on B2B SaaS &amp; revenue.
           </h2>
           <p className="text-muted-foreground text-lg leading-relaxed max-w-2xl">
             Providing strategic insights on enterprise sales, go-to-market strategy, revenue scaling,
@@ -707,8 +712,8 @@ function Education() {
   return (
     <section className="py-24 md:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <SectionLabel num="05">Foundation</SectionLabel>
-        <SectionHead title={<>Education & <span className="text-gradient italic">background</span></>} />
+        <SectionLabel num="03">Foundation</SectionLabel>
+        <SectionHead title={<>Education &amp; background.</>} />
         <div className="grid md:grid-cols-2 gap-4 md:gap-6 max-w-4xl">
           {education.map((e, i) => (
             <motion.div
@@ -827,7 +832,6 @@ function Contact() {
 
 // ─── PAGE ───
 export default function Home() {
-  const reduce = useReducedMotion()
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-primary/30 selection:text-foreground">
       <Nav />
@@ -841,7 +845,6 @@ export default function Home() {
       <IndustryExpert />
       <Education />
       <Contact />
-      {!reduce && <div className="sr-only" aria-hidden>{null}</div>}
     </div>
   )
 }
