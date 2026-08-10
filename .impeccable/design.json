@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-10T08:00:00Z",
+  "title": "Design System: Naresh Singh Bhau — B2B Revenue Leader",
+  "extensions": {
+    "colorMeta": {
+      "bg-deep": { "role": "neutral", "displayName": "Console Slate", "canonical": "hsl(220 15% 6%)", "tonalRamp": ["hsl(220 15% 4%)", "hsl(220 15% 8%)", "hsl(220 15% 12%)", "hsl(220 15% 18%)", "hsl(220 15% 26%)", "hsl(220 15% 40%)", "hsl(220 15% 62%)", "hsl(220 15% 88%)"] },
+      "surface": { "role": "neutral", "displayName": "Raised Panel", "canonical": "hsl(220 15% 10%)", "tonalRamp": ["hsl(220 15% 6%)", "hsl(220 15% 10%)", "hsl(220 15% 14%)", "hsl(220 15% 20%)", "hsl(220 15% 30%)", "hsl(220 15% 45%)", "hsl(220 15% 66%)", "hsl(220 15% 92%)"] },
+      "foreground": { "role": "neutral", "displayName": "Reading Blue-Grey", "canonical": "hsl(0 0% 98%)", "tonalRamp": ["hsl(0 0% 40%)", "hsl(0 0% 50%)", "hsl(0 0% 62%)", "hsl(0 0% 72%)", "hsl(0 0% 80%)", "hsl(0 0% 88%)", "hsl(0 0% 95%)", "hsl(0 0% 98%)"] },
+      "signal-amber": { "role": "primary", "displayName": "Signal Amber", "canonical": "hsl(38 92% 50%)", "tonalRamp": ["hsl(38 92% 15%)", "hsl(38 92% 25%)", "hsl(38 92% 35%)", "hsl(38 92% 45%)", "hsl(38 92% 50%)", "hsl(38 92% 62%)", "hsl(38 92% 75%)", "hsl(38 92% 88%)"] },
+      "on-amber": { "role": "on-primary", "displayName": "Console On-Amber", "canonical": "hsl(220 15% 6%)", "tonalRamp": ["hsl(220 15% 4%)", "hsl(220 15% 8%)", "hsl(220 15% 12%)", "hsl(220 15% 18%)", "hsl(220 15% 26%)", "hsl(220 15% 40%)", "hsl(220 15% 62%)", "hsl(220 15% 88%)"] },
+      "raised": { "role": "secondary", "displayName": "Instrument Grey", "canonical": "hsl(220 12% 16%)", "tonalRamp": ["hsl(220 12% 8%)", "hsl(220 12% 12%)", "hsl(220 12% 16%)", "hsl(220 12% 24%)", "hsl(220 12% 36%)", "hsl(220 12% 50%)", "hsl(220 12% 66%)", "hsl(220 12% 86%)"] },
+      "muted-slate": { "role": "neutral", "displayName": "Muted Slate", "canonical": "hsl(220 10% 60%)", "tonalRamp": ["hsl(220 10% 30%)", "hsl(220 10% 38%)", "hsl(220 10% 46%)", "hsl(220 10% 54%)", "hsl(220 10% 60%)", "hsl(220 10% 70%)", "hsl(220 10% 82%)", "hsl(220 10% 93%)"] },
+      "hairline": { "role": "neutral", "displayName": "Hairline", "canonical": "hsl(220 12% 20%)", "tonalRamp": ["hsl(220 12% 10%)", "hsl(220 12% 14%)", "hsl(220 12% 20%)", "hsl(220 12% 28%)", "hsl(220 12% 38%)", "hsl(220 12% 52%)", "hsl(220 12% 68%)", "hsl(220 12% 88%)"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display / Playfair", "purpose": "Hero H1 only. Tighter tracking, optional italic gradient flourish." },
+      "headline": { "displayName": "Headline / Playfair", "purpose": "Section titles. One idea per line." },
+      "title": { "displayName": "Title / Playfair", "purpose": "Tile titles, company names, mini-stat keys." },
+      "body": { "displayName": "Body / Inter", "purpose": "Paragraphs and leads, max 65ch, Muted Slate at rest." },
+      "label": { "displayName": "Label / Mono", "purpose": "Eyebrow indexes, tags, captions. Uppercase, 0.2em spacing." },
+      "stat": { "displayName": "Stat / Mono", "purpose": "Metric Wall ledger numerals. Hero figures swap to Playfair Display." }
+    },
+    "shadows": [
+      { "name": "target-glow", "value": "0 0 40px -10px hsl(38 92% 50% / 0.3)", "purpose": "Proof-point lock-on. Hero metric panel and Industry Expert icon only." },
+      { "name": "ambient-hover", "value": "0 1px 2px 0 rgb(0 0 0 / 0.05)", "purpose": "Outline buttons baseline; surfaces otherwise use tonal layering." }
+    ],
+    "motion": [
+      { "name": "ease-heroic", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "All entrance reveals (fade-up), scroll cue bounce, nav drop." },
+      { "name": "duration-entrance", "value": "700ms", "purpose": "Standard whileInView reveal." },
+      { "name": "duration-state", "value": "250-300ms", "purpose": "Hover/focus colour and border transitions." },
+      { "name": "marquee", "value": "40s linear infinite", "purpose": "Skills marquee scroll; translateX -50% loop." },
+      { "name": "float-blob", "value": "9-12s ease-in-out infinite", "purpose": "Atmospheric amber blobs drift; disabled under prefers-reduced-motion." }
+    ],
+    "breakpoints": [
+      { "name": "base", "value": "0px" },
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button (pill)",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The only true call-to-action — amber signal on a dark console.",
+      "html": "<button class=\"ds-btn-primary\">Download Resume<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"/><polyline points=\"7 10 12 15 17 10\"/><line x1=\"12\" y1=\"15\" x2=\"12\" y2=\"3\"/></svg></button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; padding: 0 28px; border: none; border-radius: 9999px; background: hsl(38 92% 50%); color: hsl(220 15% 6%); font-family: 'Inter', system-ui, sans-serif; font-size: 15px; font-weight: 500; letter-spacing: 0.01em; cursor: pointer; transition: background 0.25s cubic-bezier(0.16,1,0.3,1), transform 0.25s cubic-bezier(0.16,1,0.3,1); } .ds-btn-primary:hover { background: hsl(38 92% 45%); transform: translateY(-1px); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px hsl(38 92% 50% / 0.5); }"
+    },
+    {
+      "name": "Outline Button (pill)",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary action — translucent console shell, white hairline.",
+      "html": "<button class=\"ds-btn-outline\">View Experience<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\"/><polyline points=\"12 5 19 12 12 19\"/></svg></button>",
+      "css": ".ds-btn-outline { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; padding: 0 28px; border: 1px solid hsla(0 0% 100% / 0.15); border-radius: 9999px; background: hsla(220 15% 6% / 0.4); color: hsl(0 0% 98%); font-family: 'Inter', system-ui, sans-serif; font-size: 15px; font-weight: 500; cursor: pointer; transition: background 0.25s cubic-bezier(0.16,1,0.3,1), border-color 0.25s; } .ds-btn-outline:hover { background: hsla(0 0% 100% / 0.05); } .ds-btn-outline:focus-visible { outline: none; box-shadow: 0 0 0 3px hsl(38 92% 50% / 0.5); }"
+    },
+    {
+      "name": "Standard Proof Tile",
+      "kind": "card",
+      "refersTo": "tile-card",
+      "description": "Quiet proof block — 2% white fill, hairline, warms to amber on hover.",
+      "html": "<div class=\"ds-tile\"><span class=\"ds-well\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"/><polyline points=\"22 4 12 14.01 9 11.01\"/></svg></span><div class=\"ds-tile-body\"><h3 class=\"ds-tile-title\">65%+ Retention YoY</h3><p class=\"ds-tile-desc\">Predictable renewals and long-term revenue stability.</p></div></div>",
+      "css": ".ds-tile { display: flex; align-items: flex-start; gap: 16px; padding: 24px; border: 1px solid hsla(0 0% 100% / 0.08); border-radius: 16px; background: hsla(0 0% 100% / 0.02); transition: border-color 0.3s, background 0.3s; } .ds-tile:hover { border-color: hsl(38 92% 50% / 0.3); background: hsla(0 0% 100% / 0.04); } .ds-well { flex: none; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 12px; background: hsl(38 92% 50% / 0.1); color: hsl(38 92% 50%); transition: background 0.3s; } .ds-tile:hover .ds-well { background: hsl(38 92% 50% / 0.2); } .ds-tile-title { margin: 0 0 4px; font-family: 'Playfair Display', Georgia, serif; font-size: 20px; font-weight: 700; letter-spacing: -0.02em; color: hsl(0 0% 98%); } .ds-tile-desc { margin: 0; font-family: 'Inter', system-ui, sans-serif; font-size: 14px; line-height: 1.6; color: hsl(220 10% 60%); }"
+    },
+    {
+      "name": "Featured Proof Tile",
+      "kind": "card",
+      "refersTo": "featured-tile",
+      "description": "Marquee proof — amber gradient wash, blob glow, gradient numeral.",
+      "html": "<div class=\"ds-tile-featured\"><span class=\"ds-feat-num\">\u20b996L</span><h3 class=\"ds-feat-title\">Largest single B2B deal</h3><span class=\"ds-chip\">Deal</span></div>",
+      "css": ".ds-tile-featured { position: relative; overflow: hidden; padding: 32px; border: 1px solid hsl(38 92% 50% / 0.2); border-radius: 16px; background: linear-gradient(135deg, hsl(38 92% 50% / 0.15), transparent 60%); color: hsl(0 0% 98%); } .ds-tile-featured .ds-feat-num { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 24px; font-weight: 600; width: fit-content; background: linear-gradient(135deg, hsl(38 92% 55%), hsl(38 80% 70%)); -webkit-background-clip: text; background-clip: text; color: transparent; } .ds-tile-featured .ds-feat-title { margin: 8px 0 12px; font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; letter-spacing: -0.02em; } .ds-chip { display: inline-flex; align-items: center; padding: 4px 12px; border: 1px solid hsla(0 0% 100% / 0.1); border-radius: 9999px; background: hsla(220 15% 6% / 0.6); font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: hsl(220 10% 60%); }"
+    },
+    {
+      "name": "Ledger Row (Metric Wall)",
+      "kind": "card",
+      "refersTo": "tile-card",
+      "description": "The system thesis — a mono gradient numeral leading a label/detail pair.",
+      "html": "<div class=\"ds-ledger\"><span class=\"ds-ledger-num\">\u20b93Cr+</span><div class=\"ds-ledger-body\"><b>average monthly regional revenue</b><span>managed at IndiaMART</span></div></div>",
+      "css": ".ds-ledger { display: grid; grid-template-columns: 220px 1fr; align-items: baseline; gap: 24px; margin: 0; padding: 32px 0; border-top: 1px solid hsla(0 0% 100% / 0.07); transition: transform 0.3s; } .ds-ledger:hover { transform: translateX(4px); } .ds-ledger-num { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 36px; font-weight: 600; letter-spacing: -0.01em; line-height: 1; background: linear-gradient(135deg, hsl(38 92% 55%), hsl(38 80% 70%)); -webkit-background-clip: text; background-clip: text; color: transparent; } .ds-ledger-body { font-family: 'Inter', system-ui, sans-serif; } .ds-ledger-body b { display: block; margin-bottom: 4px; font-size: 18px; font-weight: 500; color: hsl(0 0% 98% / 0.9); } .ds-ledger-body span { font-size: 15px; color: hsl(220 10% 60%); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Signal Room",
+    "overview": "This is a dark operations console, not a brochure. The page is a control room where a career in revenue is rendered as a live instrument panel: figures glow like indicators, the timeline reads like a run of operation, and the serif headline is the one authoritative voice in the room. The visitor is treated as a decision-maker standing at the console and being shown a track record they can verify in seconds. Quiet authority, loud results: the canvas is calm and premium — deep navy-slate, generous space, restrained motion. The amber never decorates; it signals. It marks what moved the business: the numbers, the deal trail, the proof tiles, the one call to action. Density is moderate and editorial. Text-heavy sections use a wide two-column grid with a sticky left rail; proof surfaces pack into dense bento grids and ledger rows. Depth is tonal, not shadowy: layered translucent surfaces, one frosted-glass panel, and a soft amber glow reserved for exactly two proof-point containers. The single recognizable flourish is the gradient-amber numeral — the whole system orbits it.",
+    "keyCharacteristics": [
+      "Dark slate-blue console aesthetic; amber = live signal only.",
+      "Playfair Display serif for authority; Inter for utility; JetBrains Mono for instrumentation.",
+      "Gradient-amber numerals are the signature motif — never plain-gray figures.",
+      "Flat tonal surfaces plus one frosted-glass proof panel; glow reserved for proof.",
+      "Editorial two-column grids with a sticky left rail on scannable sections.",
+      "Restrained motion: fade-up reveals on scroll, one slow skills marquee, quiet hovers."
+    ],
+    "rules": [
+      { "name": "The One Signal Rule", "body": "Signal Amber appears on \u226415% of any screen and always marks proof, an active indicator, or a primary action. When in doubt, render an element in neutrals and let the data do the talking.", "section": "colors" },
+      { "name": "The Noise Rule", "body": "No gradient other than the amber numeral gradient, no more than one glowing container at a time, no third accent color. The palette is strictly amber-on-slate.", "section": "colors" },
+      { "name": "The Ledger Rule", "body": "Every business figure is a numeral — set either in JetBrains Mono (Metric Wall) or Playfair Display (hero panel, About chips) — at display size, gradient amber, never gray inline text.", "section": "typography" },
+      { "name": "The Reading Rule", "body": "Body paragraphs are never amber, never serif, and never bolded wholesale. Emphasis is reserved for bold foreground spans and the occasional inline figure.", "section": "typography" },
+      { "name": "The Target-Lock Rule", "body": "Glow equals proof. If a glowing container does not enclose a verifiable figure or credential, remove the glow. Never more than one target locked at a time.", "section": "elevation" },
+      { "name": "The Flat-By-Default Rule", "body": "Surfaces start flat. Hover reveals a hairline lift: borders warm to amber, fills step up 2%, icon wells brighten. Shadows do not accumulate with stacking.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do set every business figure as a large mono or serif-display numeral with the amber gradient — never as gray body-sized text.",
+      "Do reserve Signal Amber for proof, live indicators, and primary actions; keep paragraphs in Muted Slate.",
+      "Do use 16px card corners, 12px icon wells, and full pills only — never mixed or random radius values.",
+      "Do keep body copy width at \u226465ch and Muted Slate at rest.",
+      "Do use tonal layering (2\u20134% white fills + hairlines) as the default depth mechanism.",
+      "Do keep one gradient expression per screen — the amber numeral gradient — and nothing else."
+    ],
+    "donts": [
+      "Don't add a second accent color, a second gradient style, or glow on more than one proof container (see The Target-Lock Rule).",
+      "Don't render the skills marquee, eyebrow tags, or captions in amber fill — labels are mono on slate.",
+      "Don't use Playfair for paragraphs or Inter for headline numerals; the three-font division is the system.",
+      "Don't stack an amber glow with a blue/green glow or introduce pure black text; the room is always Console Slate.",
+      "Don't break the hero on mobile, let the timeline rail overlap its content, or leave a bento cell empty at any breakpoint.",
+      "Don't fabricate testimonials, portraits, press quotes, or unreviewed figures; proof must stay verifiable (see PRODUCT.md)."
+    ]
+  }
+}
