@@ -119,7 +119,7 @@ Density is moderate and editorial. Text-heavy sections (About, Capabilities) use
 One signal (Signal Amber) against a navy-slate neutral scale. The palette is near-monochrome by design; the amber earns its noise through scarcity.
 
 ### Primary
-- **Signal Amber** (`hsl(38 92% 50%)`, also the `ring`): live indicators only. Buttons, timeline rail and dots, eyebrow indexes, icon wells, gradient numerals, tag underlines on hover, back-to-top, marquee separators, focus rings. Never bulk reading text.
+- **Signal Amber** (`hsl(38 92% 50%)`, also the `ring`): live indicators only. Buttons, timeline rail and dots, eyebrow indexes, icon wells, gradient numerals, tag underlines on hover, back-to-top, focus rings. Never bulk reading text. (Marquee separators are neutral, per the Noise Rule.)
 - **Signal Amber Deep** (`hsl(38 92% 45%)`): hover states of amber surfaces (button hover reads slightly deeper).
 
 ### Neutral

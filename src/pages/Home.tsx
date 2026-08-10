@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion, useReducedMotion, AnimatePresence } from 'framer-motion'
 import {
   Phone, Mail, Linkedin, MapPin, Download, ArrowUpRight,
   TrendingUp, Users, Target, BadgeCheck, Briefcase,
-  GraduationCap, Sparkles, ArrowRight, ChevronUp
+  GraduationCap, Sparkles, ArrowRight, ChevronUp, Menu, X
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -37,7 +37,7 @@ const experience = [
       'Led a 50+ member B2B sales organisation — 36 Executives, 9 Managers, 3 Branch Managers — with 8 L1s promoted to leadership and 1 L2 to Branch Manager',
       'Managed ₹3Cr average monthly regional revenue, delivering 18%+ YoY growth while sustaining 65% customer retention across MSME & enterprise accounts',
       'Owned regional P&L outcomes — aligning topline growth with hiring strategy, attrition control, and productivity-led cost optimisation',
-      'Closed multi-million-rupee deals up to ₹96 Lakhs through consultative, solution-based selling',
+      'Closed multi-million-rupee deals up to ₹94 Lakhs through consultative, solution-based selling',
       'Launched the Jaipur Mansarovar branch (Dec 2024) to expand market coverage and lift field productivity',
       'Built data-led GTM dashboards tracking pipeline, revenue, productivity, renewals & churn',
     ],
@@ -51,7 +51,7 @@ const experience = [
     index: '02',
     highlights: [
       'Managed full inside & direct sales cycles from prospecting to closure',
-      'Generated ₹1Cr revenue in 7 months, achieving 35,000 WRPS and consistently exceeding targets',
+      'Generated ₹1Cr revenue in 7 months while consistently exceeding revenue targets',
       'Converted leads into paid enrolments through consultative selling and objection handling',
       'Mentored new BDAs, raising pitch quality and conversion ratios across the team',
     ],
@@ -60,8 +60,8 @@ const experience = [
 
 const achievements = [
   {
-    title: '1.3× PCR Champion',
-    desc: 'Drove 2× branch revenue growth at IndiaMART over 5 years.',
+    title: '2× Branch Revenue, 5 Yrs',
+    desc: 'Drove IndiaMART\u2019s Jaipur branch to 2× revenue growth over five years.',
     tag: 'Performance',
     featured: true,
   },
@@ -145,13 +145,28 @@ function SectionHead({ title, lead }: { title: React.ReactNode; lead?: string })
 // ─── NAV ───
 function Nav() {
   const [scrolled, setScrolled] = useState(false)
+  const [open, setOpen] = useState(false)
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40)
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
+    const onResize = () => setOpen(false)
+    window.addEventListener('keydown', onKey)
+    window.addEventListener('resize', onResize)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('resize', onResize)
+    }
+  }, [open])
+
   const scrollTo = (id: string) => {
+    setOpen(false)
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
@@ -199,15 +214,48 @@ function Nav() {
           ))}
         </nav>
 
-        <Button
-          asChild
-          className="rounded-full px-5 gap-2 h-9"
-        >
-          <a href={RESUME_URL} download="Naresh-Singh-Bhau-Resume.pdf">
-            <Download className="w-4 h-4" /> Resume
-          </a>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button asChild className="rounded-full px-5 gap-2 h-9">
+            <a href={RESUME_URL} download="Naresh-Singh-Bhau-Resume.pdf">
+              <Download className="w-4 h-4" /> Resume
+            </a>
+          </Button>
+          <button
+            onClick={() => setOpen((o) => !o)}
+            aria-expanded={open}
+            aria-controls="mobile-nav"
+            aria-label="Menu"
+            className="lg:hidden w-10 h-10 inline-flex items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
+
+      <AnimatePresence>
+        {open && (
+          <motion.nav
+            key="mobile-nav"
+            id="mobile-nav"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2, ease: EASE }}
+            className="lg:hidden absolute top-full inset-x-0 mx-4 mt-2 rounded-2xl border border-white/10 bg-card/95 backdrop-blur-xl p-3"
+            aria-label="Mobile"
+          >
+            {links.map((l) => (
+              <button
+                key={l.target}
+                onClick={() => scrollTo(l.target)}
+                className="w-full text-left px-4 py-3 text-sm text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-lg transition-colors"
+              >
+                {l.label}
+              </button>
+            ))}
+          </motion.nav>
+        )}
+      </AnimatePresence>
     </motion.header>
   )
 }
@@ -223,11 +271,11 @@ function Hero() {
       {/* Atmosphere */}
       <div className="absolute inset-0 pointer-events-none" aria-hidden>
         <div
-          className="absolute -top-32 -right-24 w-[42rem] h-[42rem] bg-primary/10 rounded-full blur-[140px]"
+          className="absolute -top-32 -right-24 w-[42rem] h-[42rem] bg-primary/5 rounded-full blur-[140px]"
           style={reduce ? undefined : { animation: 'float 9s ease-in-out infinite' }}
         />
         <div
-          className="absolute bottom-0 -left-32 w-[30rem] h-[30rem] bg-primary/5 rounded-full blur-[120px]"
+          className="absolute bottom-0 -left-32 w-[30rem] h-[30rem] bg-primary/[0.03] rounded-full blur-[120px]"
           style={reduce ? undefined : { animation: 'float 12s ease-in-out infinite reverse' }}
         />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,hsl(220_15%_6%)_78%)]" />
@@ -326,24 +374,29 @@ function Hero() {
           className="relative"
         >
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl overflow-hidden glow-amber relative">
-            <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-primary/15 blur-[70px]" aria-hidden />
+            <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-primary/10 blur-[70px]" aria-hidden />
             <div className="grid grid-cols-2 divide-x divide-y divide-white/[0.07]">
               {stats.map((s) => (
                 <div key={s.label} className="p-6 md:p-8">
                   <s.icon className="w-5 h-5 text-primary mb-3" />
-                  <div className="font-display text-4xl md:text-[2.6rem] font-bold text-gradient leading-none mb-2">
+                  <div className="font-display text-4xl md:text-[2.5rem] font-bold text-gradient leading-none mb-2">
                     {s.value}
                   </div>
                   <div className="text-sm text-muted-foreground leading-snug">{s.label}</div>
                 </div>
               ))}
             </div>
-            <div className="border-t border-white/[0.07] px-6 py-4 flex items-center justify-between text-xs">
+            <a
+              href="https://www.linkedin.com/in/nareshsinghbhau"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="border-t border-white/[0.07] px-6 py-4 flex items-center justify-between text-xs group/cert hover:bg-white/[0.02] transition-colors"
+            >
               <span className="text-muted-foreground inline-flex items-center gap-1.5">
                 <BadgeCheck className="w-4 h-4 text-primary" /> Insight Alpha — Industry Expert
               </span>
-              <ArrowUpRight className="w-4 h-4 text-primary/70" />
-            </div>
+              <ArrowUpRight className="w-4 h-4 text-primary/70 group-hover/cert:translate-x-0.5 group-hover/cert:-translate-y-0.5 transition-transform" />
+            </a>
           </div>
         </motion.aside>
       </div>
@@ -385,7 +438,7 @@ function Marquee() {
         {items.map((item, i) => (
           <span key={i} className="inline-flex items-center gap-10 text-sm text-muted-foreground">
             {item}
-            <span className="text-primary/60">✳</span>
+            <span className="text-white/20">✳</span>
           </span>
         ))}
       </div>
@@ -431,9 +484,9 @@ function About() {
             className="pt-6 grid sm:grid-cols-3 gap-4"
           >
             {[
-              { k: '₹3 Cr+', v: 'monthly regional revenue managed' },
-              { k: '2×', v: 'branch revenue growth (5 yrs)' },
-              { k: '50+', v: 'sales professionals led' },
+              { k: '36', v: 'sales executives coached & led' },
+              { k: '9', v: 'managers reporting in' },
+              { k: '3', v: 'branch managers developed' },
             ].map((m, i) => (
               <motion.div
                 key={m.k}
@@ -460,7 +513,7 @@ function MetricWall() {
         {[
           ['₹3Cr+', 'average monthly regional revenue', 'managed at IndiaMART'],
           ['18%+', 'YoY revenue growth', 'delivered consistently'],
-          ['₹96 L', 'largest single B2B deal', 'multi-million-rupee, consultative'],
+          ['₹94 L', 'largest single B2B deal', 'multi-million-rupee, consultative'],
           ['65%+', 'customer retention', 'predictable renewals YoY'],
           ['6,000+', 'paid B2B accounts', 'opened & scaled in Jaipur'],
         ].map(([n, l, d], i) => (
@@ -492,6 +545,7 @@ function Experience() {
   return (
     <section id="experience" className="py-24 md:py-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <SectionLabel num="02">Experience</SectionLabel>
         <SectionHead
           title={<>From direct sales to regional P&amp;L ownership.</>}
           lead="A proven track record of turning sales teams into revenue engines — and sales leaders into managers."
@@ -511,9 +565,7 @@ function Experience() {
                 viewport={{ once: true, margin: '-100px' }}
                 custom={i}
                 variants={reveal}
-                className={`relative grid md:grid-cols-2 gap-4 md:gap-0 ${
-                  i % 2 === 1 ? '' : ''
-                }`}
+                className={`relative grid md:grid-cols-2 gap-4 md:gap-0`}
               >
                 <span
                   className="absolute left-5 md:left-1/2 -translate-x-1/2 top-1 w-3 h-3 rounded-full bg-primary ring-4 ring-background"
@@ -576,7 +628,7 @@ function FeaturedTile({ a, large }: { a: (typeof achievements)[number]; large?: 
         large ? 'md:col-span-2 md:row-span-2' : 'md:min-h-[168px]'
       }`}
     >
-      <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-primary/15 blur-[60px] group-hover:scale-150 transition-transform duration-700" aria-hidden />
+      <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-primary/15 blur-[60px]" aria-hidden />
       <span className="w-11 h-11 rounded-xl bg-primary text-primary-foreground flex items-center justify-center mb-6">
         <Sparkles className="w-5 h-5" />
       </span>
@@ -600,7 +652,7 @@ function SmallTile({ a }: { a: (typeof achievements)[number] }) {
       variants={reveal}
       className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6 flex items-start gap-4 group hover:border-primary/30 hover:bg-white/[0.04] transition-all"
     >
-      <span className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
+      <span className="w-10 h-10 rounded-lg bg-white/5 text-muted-foreground flex items-center justify-center shrink-0 group-hover:bg-white/10 transition-colors">
         <BadgeCheck className="w-5 h-5" />
       </span>
       <div>
@@ -617,7 +669,7 @@ function Achievements() {
   return (
     <section id="achievements" className="py-24 md:py-32 bg-white/[0.015] border-y border-white/[0.05]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <SectionLabel num="02">Track Record</SectionLabel>
+        <SectionLabel num="03">Track Record</SectionLabel>
         <div className="mb-14">
           <h2 className="font-display text-3xl md:text-5xl font-bold tracking-tight leading-[1.08]">
             Proof, not promises.
@@ -643,6 +695,7 @@ function Capabilities() {
     <section id="capabilities" className="py-24 md:py-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-[1fr_1.8fr] gap-12">
         <div className="lg:sticky lg:top-28 self-start">
+          <SectionLabel num="04">Capabilities</SectionLabel>
           <h2 className="font-display text-3xl md:text-4xl font-bold tracking-tight leading-[1.1] mb-6">
             How I drive revenue — end to end.
           </h2>
@@ -684,8 +737,8 @@ function Capabilities() {
 function IndustryExpert() {
   return (
     <section className="relative overflow-hidden border-y border-primary/20">
-      <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent" aria-hidden />
-      <div className="absolute -top-20 right-1/4 w-72 h-72 rounded-full bg-primary/10 blur-[90px]" aria-hidden />
+      <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.06] via-primary/[0.03] to-transparent" aria-hidden />
+      <div className="absolute -top-20 right-1/4 w-72 h-72 rounded-full bg-primary/[0.05] blur-[90px]" aria-hidden />
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-28 grid lg:grid-cols-[auto_1fr] gap-10 items-center">
         <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center glow-amber shrink-0">
           <Sparkles className="w-10 h-10" />
@@ -712,7 +765,7 @@ function Education() {
   return (
     <section className="py-24 md:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <SectionLabel num="03">Foundation</SectionLabel>
+        <SectionLabel num="05">Foundation</SectionLabel>
         <SectionHead title={<>Education &amp; background.</>} />
         <div className="grid md:grid-cols-2 gap-4 md:gap-6 max-w-4xl">
           {education.map((e, i) => (
@@ -725,7 +778,7 @@ function Education() {
               variants={reveal}
               className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-7 md:p-9 flex items-start gap-5 hover:border-primary/30 transition-all group"
             >
-              <span className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
+              <span className="w-11 h-11 rounded-xl bg-white/5 text-muted-foreground flex items-center justify-center shrink-0 group-hover:bg-white/10 transition-colors">
                 <GraduationCap className="w-5 h-5" />
               </span>
               <div>
@@ -751,7 +804,7 @@ function Contact() {
 
   return (
     <footer id="contact" className="relative border-t border-white/[0.07] overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,hsla(38,92%,50%,0.08),transparent_60%)]" aria-hidden />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,hsla(38,92%,50%,0.05),transparent_60%)]" aria-hidden />
       <div className="relative max-w-4xl mx-auto px-4 sm:px-6 py-24 md:py-32 text-center">
         <motion.div
           initial="hidden"

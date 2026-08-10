@@ -21,7 +21,7 @@ Personal professional site for Naresh Singh Bhau, B2B revenue leader. It makes h
 
 ## Positioning
 
-A revenue leader who both builds teams and owns P&L outcomes — 8+ years in B2B, a 50+ member organisation, ₹3Cr+ monthly regional revenue at 18%+ YoY growth, big-ticket enterprise deals up to ₹96L. The positioning is operator evidence, not a template resume: promotions earned (Branch → Regional Manager, "youngest RM — Jaipur"), a launched branch, and retention he can state (65%+ YoY).
+A revenue leader who both builds teams and owns P&L outcomes — 8+ years in B2B, a 50+ member organisation, ₹3Cr+ monthly regional revenue at 18%+ YoY growth, big-ticket enterprise deals up to ₹94L. The positioning is operator evidence, not a template resume: promotions earned (Branch → Regional Manager, "youngest RM — Jaipur"), a launched branch, and retention he can state (65%+ YoY).
 
 ## Operating Context
 
@@ -41,7 +41,7 @@ Source-of-truth figures (owner-confirmed; site copy must not drift from them):
 - ₹3Cr+ average monthly regional revenue
 - 18%+ YoY revenue growth
 - 65%+ customer retention
-- Largest closed deal: ₹96 Lakhs (also cited as "₹94 Lakh deal" in achievements — reconcile or tag precisely)
+- Largest closed deal: ₹94 Lakhs (owner-reconciled on 2026-08-10; used consistently site-wide as the achievements "₹94 Lakh Deal", MetricWall "₹94 L", and the Experience "up to ₹94 Lakhs" bullet)
 - 6,000+ paid B2B accounts opened at the Jaipur branch
 - BYJU's: ₹1Cr revenue in 7 months, permanent role in 3 months
 
