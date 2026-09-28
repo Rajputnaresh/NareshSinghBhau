@@ -1,924 +1,1110 @@
-import { useEffect, useState } from 'react'
-import { motion, useReducedMotion, AnimatePresence } from 'framer-motion'
-import {
-  Phone, Mail, Linkedin, MapPin, Download, ArrowUpRight,
-  TrendingUp, Users, Target, BadgeCheck, Briefcase,
-  GraduationCap, Sparkles, ArrowRight, ChevronUp, Menu, X
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
-const RESUME_URL = './resume/Naresh-Singh-Bhau-Resume.pdf'
-
-const EASE = [0.16, 1, 0.3, 1] as const
-
-const NAV_LINKS = [
-  { label: 'Experience', target: 'experience' },
-  { label: 'Achievements', target: 'achievements' },
-  { label: 'Capabilities', target: 'capabilities' },
-  { label: 'Contact', target: 'contact' },
-] as const
-
-// ─── DATA ───
-const stats = [
-  { label: 'Years in B2B Sales', value: '8+', icon: Briefcase },
-  { label: 'Monthly Regional Revenue', value: '₹3Cr+', icon: TrendingUp },
-  { label: 'YoY Revenue Growth', value: '18%+', icon: Target },
-  { label: 'Team Led', value: '50+', icon: Users },
-]
-
-const skillsMarquee = [
-  'Enterprise Sales', 'SaaS & B2B', 'Key Account Mgmt', 'Consultative Selling',
-  'Regional P&L', 'GTM Strategy', 'Big-Ticket Deals', 'Revenue Leadership',
-  'Customer Success', 'Team Building', 'Market Expansion', 'Data-Led GTM',
-]
-
-const experience = [
-  {
-    company: 'IndiaMART InterMESH Ltd',
-    role: 'Regional Manager',
-    sub: 'Promoted from Branch Manager',
-    location: 'Jaipur, Rajasthan',
-    period: 'Jul 2019 — Present',
-    index: '01',
-    highlights: [
-      'Led a 50+ member B2B sales organisation — 36 Executives, 9 Managers, 3 Branch Managers — with 8 L1s promoted to leadership and 1 L2 to Branch Manager',
-      'Managed ₹3Cr average monthly regional revenue, delivering 18%+ YoY growth while sustaining 65% customer retention across MSME & enterprise accounts',
-      'Owned regional P&L outcomes — aligning topline growth with hiring strategy, attrition control, and productivity-led cost optimisation',
-      'Closed multi-million-rupee deals up to ₹94 Lakhs through consultative, solution-based selling',
-      'Launched the Jaipur Mansarovar branch (Dec 2024) to expand market coverage and lift field productivity',
-      'Built data-led GTM dashboards tracking pipeline, revenue, productivity, renewals & churn',
-    ],
-  },
-  {
-    company: 'BYJU\'S · Think & Learn Pvt Ltd',
-    role: 'Senior Business Development Associate',
-    sub: 'Direct Sales · Bengaluru',
-    location: 'Bengaluru, Karnataka',
-    period: 'May 2017 — Jul 2019',
-    index: '02',
-    highlights: [
-      'Managed full inside & direct sales cycles from prospecting to closure',
-      'Generated ₹1Cr revenue in 7 months while consistently exceeding revenue targets',
-      'Converted leads into paid enrolments through consultative selling and objection handling',
-      'Mentored new BDAs, raising pitch quality and conversion ratios across the team',
-    ],
-  },
-]
-
-const achievements = [
-  {
-    title: '2× Branch Revenue, 5 Yrs',
-    desc: 'Drove IndiaMART\u2019s Jaipur branch to 2× revenue growth over five years.',
-    tag: 'Performance',
-    featured: true,
-  },
-  {
-    title: '₹94 Lakh Deal',
-    desc: 'Enterprise deal closed with 100% upfront payment.',
-    tag: 'Deal',
-    featured: true,
-  },
-  {
-    title: 'Youngest RM — Jaipur',
-    desc: 'Promoted 2022 on one of the fastest growth tracks in the organisation.',
-    tag: 'Promotion',
-  },
-  {
-    title: '65%+ Retention YoY',
-    desc: 'Predictable renewals and long-term revenue stability.',
-    tag: 'Retention',
-  },
-  {
-    title: '6,000+ Paid Accounts',
-    desc: 'Opened and scaled the Jaipur branch to 6,000+ paid B2B accounts.',
-    tag: 'Growth',
-  },
-  {
-    title: 'BYJU\'s in 3 Months',
-    desc: 'Secured permanent role, closing ₹2L+ monthly revenue.',
-    tag: 'Milestone',
-  },
-]
-
-const competencies = [
-  { skill: 'Sales & Revenue Leadership', note: 'Multi-level orgs, pipeline to close' },
-  { skill: 'Enterprise & Key Account Management', note: 'Strategic accounts, long cycles' },
-  { skill: 'Consultative & Solution Selling', note: 'Value-led, multi-stakeholder' },
-  { skill: 'SaaS & B2B Sales', note: 'MSME + enterprise segments' },
-  { skill: 'Big-Ticket Deal Closures', note: 'Multi-million-rupee negotiations' },
-  { skill: 'Regional P&L Management', note: 'Growth, cost & retention' },
-  { skill: 'Market Expansion & GTM Strategy', note: 'New branch & territory launches' },
-  { skill: 'Team Building & Performance', note: 'Coaching, hiring, attrition' },
-]
-
-const education = [
-  { degree: 'B.E. — Civil Engineering', school: 'Chandigarh University' },
-  { degree: '10th & 12th', school: 'Army Public School' },
-]
-
-// ─── HELPERS ───
-const reveal = {
-  hidden: { opacity: 0, y: 32 },
-  show: (i = 0) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.08, duration: 0.7, ease: EASE },
-  }),
-}
-
-function SectionLabel({ num, children }: { num: string; children: React.ReactNode }) {
-  return (
-    <div className="flex items-center gap-3 mb-10 md:mb-14">
-      <span className="font-mono text-xs tracking-[0.25em] text-primary/80">{num}</span>
-      <span className="h-px w-10 bg-gradient-to-r from-primary/50 to-transparent" />
-      <span className="text-sm text-muted-foreground tracking-wide uppercase">{children}</span>
-    </div>
-  )
-}
-
-function SectionHead({ title, lead }: { title: React.ReactNode; lead?: string }) {
-  return (
-    <div className="mb-12 md:mb-16">
-      <h2 className="font-display text-3xl md:text-5xl font-bold tracking-tight leading-[1.08]">
-        {title}
-      </h2>
-      {lead && (
-        <p className="mt-4 text-muted-foreground text-lg leading-relaxed max-w-[65ch]">{lead}</p>
-      )}
-    </div>
-  )
-}
-
-// ─── NAV ───
-function Nav() {
-  const [scrolled, setScrolled] = useState(false)
-  const [open, setOpen] = useState(false)
-  const [active, setActive] = useState('')
+/**
+ * Custom hook to simulate typewriter text reveal with startDelay and configurable speed.
+ */
+function useTypewriter(text: string, speed = 36, startDelay = 500) {
+  const [displayed, setDisplayed] = useState('');
+  const [done, setDone] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => {
-      setScrolled(window.scrollY > 40)
-      const threshold = window.innerHeight / 3.5
-      let current = ''
-      for (const l of NAV_LINKS) {
-        const el = document.getElementById(l.target)
-        if (el && el.getBoundingClientRect().top <= threshold) current = l.target
-      }
-      setActive(current)
-    }
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+    let index = 0;
+    let interval: ReturnType<typeof setInterval> | undefined;
 
-  useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
-    const onResize = () => setOpen(false)
-    window.addEventListener('keydown', onKey)
-    window.addEventListener('resize', onResize)
+    const timer = setTimeout(() => {
+      interval = setInterval(() => {
+        index += 1;
+        setDisplayed(text.slice(0, index));
+        if (index >= text.length) {
+          clearInterval(interval);
+          setDone(true);
+        }
+      }, speed);
+    }, startDelay);
+
     return () => {
-      window.removeEventListener('keydown', onKey)
-      window.removeEventListener('resize', onResize)
-    }
-  }, [open])
+      clearTimeout(timer);
+      if (interval) clearInterval(interval);
+    };
+  }, [text, speed, startDelay]);
 
-  const scrollTo = (id: string) => {
-    setOpen(false)
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
+  return { displayed, done };
+}
+
+export default function Home() {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const videoWrapperRef = useRef<HTMLDivElement | null>(null);
+
+  // Normalized cursor and target seeking refs
+  const targetTimeRef = useRef<number>(0);
+  const mousePosRef = useRef<{ x: number; y: number }>({ x: 0.5, y: 0.5 });
+  const currentTiltRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const isSeekingRef = useRef<boolean>(false);
+  const lastSeekTimestampRef = useRef<number>(0);
+  const rafIdRef = useRef<number | null>(null);
+
+  // UI state
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [pillsVisible, setPillsVisible] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [activeModal, setActiveModal] = useState<string | null>(null);
+  const [cursorProgress, setCursorProgress] = useState(50); // percentage for visual feedback
+
+  // Typewriter intro text for Naresh Singh Bhau
+  const introText =
+    '8+ years scaling MSME & enterprise sales orgs. ₹3Cr+ monthly revenue, 50+ member team. Now, what are we building?';
+  const { displayed, done } = useTypewriter(introText, 36, 500);
+
+  // Initialize and prime video element
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.muted = true;
+
+    // Warm up HTML5 video decoding pipeline
+    const handleCanPlay = () => {
+      if (video.duration && !Number.isNaN(video.duration)) {
+        targetTimeRef.current = video.duration * 0.5;
+        try {
+          video.currentTime = video.duration * 0.5;
+        } catch {
+          // ignore seek error
+        }
+      }
+    };
+
+    video.addEventListener('canplay', handleCanPlay, { once: true });
+
+    // Try a silent play/pause to unlock seeking on strict mobile/webkit browsers
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          video.pause();
+        })
+        .catch(() => {
+          // autoplay restriction handled silently
+        });
+    }
+
+    return () => {
+      video.removeEventListener('canplay', handleCanPlay);
+    };
+  }, []);
+
+  // Real-time animation loop: 3D perspective parallax & smooth video seek on cursor move
+  useEffect(() => {
+    const loop = () => {
+      const video = videoRef.current;
+      const wrapper = videoWrapperRef.current;
+
+      // 1. Calculate continuous 3D tilt tracking cursor position
+      const targetTiltY = (mousePosRef.current.x - 0.5) * 18; // degrees
+      const targetTiltX = (0.5 - mousePosRef.current.y) * 12; // degrees
+      const targetShiftX = (mousePosRef.current.x - 0.5) * 25; // px
+      const targetShiftY = (mousePosRef.current.y - 0.5) * 18; // px
+
+      // Smooth interpolation (lerp)
+      currentTiltRef.current.x += (targetTiltX - currentTiltRef.current.x) * 0.12;
+      currentTiltRef.current.y += (targetTiltY - currentTiltRef.current.y) * 0.12;
+
+      if (wrapper) {
+        wrapper.style.transform = `perspective(1000px) rotateY(${currentTiltRef.current.y.toFixed(2)}deg) rotateX(${currentTiltRef.current.x.toFixed(2)}deg) translate3d(${targetShiftX.toFixed(1)}px, ${targetShiftY.toFixed(1)}px, 0) scale(1.04)`;
+      }
+
+      // 2. Video frame scrub tracking horizontal cursor position
+      if (video && video.duration && !Number.isNaN(video.duration)) {
+        const timeDiff = Math.abs(video.currentTime - targetTimeRef.current);
+        const now = performance.now();
+
+        // Safety timeout: if isSeeking is stuck for > 120ms, force unlock
+        if (isSeekingRef.current && now - lastSeekTimestampRef.current > 120) {
+          isSeekingRef.current = false;
+        }
+
+        if (!isSeekingRef.current && timeDiff > 0.03) {
+          isSeekingRef.current = true;
+          lastSeekTimestampRef.current = now;
+          try {
+            if ('fastSeek' in video && typeof (video as unknown as { fastSeek: (t: number) => void }).fastSeek === 'function') {
+              (video as unknown as { fastSeek: (t: number) => void }).fastSeek(targetTimeRef.current);
+            } else {
+              video.currentTime = targetTimeRef.current;
+            }
+          } catch {
+            isSeekingRef.current = false;
+          }
+        }
+      }
+
+      rafIdRef.current = requestAnimationFrame(loop);
+    };
+
+    rafIdRef.current = requestAnimationFrame(loop);
+
+    return () => {
+      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
+    };
+  }, []);
+
+  // Update target time on mouse / touch movement
+  const handlePointerMovement = useCallback((clientX: number, clientY: number) => {
+    const video = videoRef.current;
+    const normX = Math.max(0, Math.min(1, clientX / window.innerWidth));
+    const normY = Math.max(0, Math.min(1, clientY / window.innerHeight));
+
+    mousePosRef.current = { x: normX, y: normY };
+    setCursorProgress(Math.round(normX * 100));
+
+    if (video && video.duration && !Number.isNaN(video.duration)) {
+      targetTimeRef.current = normX * video.duration;
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      handlePointerMovement(e.clientX, e.clientY);
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        handlePointerMovement(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, [handlePointerMovement]);
+
+  // Video seeked callback to queue next target
+  const handleSeeked = () => {
+    isSeekingRef.current = false;
+    const video = videoRef.current;
+    if (!video || !video.duration) return;
+
+    if (Math.abs(video.currentTime - targetTimeRef.current) > 0.04) {
+      isSeekingRef.current = true;
+      lastSeekTimestampRef.current = performance.now();
+      try {
+        video.currentTime = targetTimeRef.current;
+      } catch {
+        isSeekingRef.current = false;
+      }
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    const video = videoRef.current;
+    if (video && video.duration) {
+      targetTimeRef.current = video.duration * 0.5;
+    }
+  };
+
+  // Reveal action pills at 400ms
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPillsVisible(true);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Clipboard copy handler
+  const handleCopyEmail = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigator.clipboard.writeText('nareshbhau1993@gmail.com').then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2200);
+    });
+  };
+
+  // Close modals on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setActiveModal(null);
+        setMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Smooth scroll to section helper
+  const scrollToSection = (id: string) => {
+    setMobileMenuOpen(false);
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   return (
-    <motion.header
-      initial={{ y: -80, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.7, ease: EASE }}
-      className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${
-        scrolled ? 'py-3 backdrop-blur-xl bg-background/80 border-b border-border/50' : 'py-5'
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
-        <button
-          onClick={() => scrollTo('hero')}
-          className="flex items-center gap-3 group rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-          aria-label="Back to top"
-        >
-          <span className="w-9 h-9 rounded-lg bg-primary text-primary-foreground font-display font-bold text-sm flex items-center justify-center group-hover:-rotate-6 transition-transform">
-            NB
-          </span>
-          <span className="hidden sm:block text-left leading-tight">
-            <span className="block font-semibold tracking-tight">Naresh Singh Bhau</span>
-            <span className="block text-[11px] text-muted-foreground">B2B Revenue Leader</span>
-          </span>
-        </button>
+    <div className="relative min-h-screen w-full bg-black text-white select-none overflow-x-hidden font-body">
+      {/* BACKGROUND VIDEO WRAPPER WITH REAL-TIME 3D PARALLAX & CURSOR SCRUB */}
+      <div
+        ref={videoWrapperRef}
+        className="fixed inset-0 z-0 pointer-events-none w-full h-full will-change-transform"
+        style={{
+          transformStyle: 'preserve-3d',
+          transition: 'transform 0.08s ease-out',
+        }}
+      >
+        <video
+          ref={videoRef}
+          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260826_041744_63efcd78-bf7d-4039-99e2-2461e8a61903.mp4"
+          muted
+          playsInline
+          preload="auto"
+          onSeeked={handleSeeked}
+          onLoadedMetadata={handleLoadedMetadata}
+          className="w-full h-full object-cover"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: '70% center',
+            filter: 'brightness(0.92) contrast(1.05)',
+          }}
+        />
 
-        <nav className="hidden lg:flex items-center gap-8" aria-label="Primary">
-          {NAV_LINKS.map((l) => (
-            <button
-              key={l.target}
-              onClick={() => scrollTo(l.target)}
-              className={`text-sm relative group transition-colors rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
-                active === l.target ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {l.label}
-              <span
-                className={`absolute -bottom-1 left-0 h-px bg-primary transition-all duration-300 ${
-                  active === l.target ? 'w-full' : 'w-0 group-hover:w-full'
-                }`}
-              />
-            </button>
-          ))}
+        {/* Cinematic gradient vignette for text legibility */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              'radial-gradient(circle at 25% 60%, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0.4) 45%, rgba(0, 0, 0, 0.8) 100%)',
+          }}
+        />
+      </div>
+
+      {/* NAVBAR (fixed, z-index: 20) */}
+      <header className="fixed top-0 left-0 right-0 z-20 w-full px-5 sm:px-8 py-4 sm:py-5 flex justify-between items-center backdrop-blur-[2px]">
+        {/* Logo (left) */}
+        <div
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="flex items-center gap-3 cursor-pointer group"
+        >
+          <span
+            className="text-[20px] sm:text-[25px] tracking-tight text-white select-none font-medium transition-opacity group-hover:opacity-80"
+            style={{ fontFamily: 'var(--font-heading)' }}
+          >
+            Naresh Singh Bhau®
+          </span>
+          <span
+            className="text-[24px] sm:text-[28px] text-white select-none leading-none transition-transform group-hover:rotate-45 duration-300"
+            style={{ letterSpacing: '-0.02em' }}
+            aria-hidden="true"
+          >
+            ✳︎
+          </span>
+        </div>
+
+        {/* Desktop nav links (center, hidden below md) */}
+        <nav className="hidden md:flex items-center text-[21px] lg:text-[23px] text-white">
+          <button
+            onClick={() => setActiveModal('Track Record')}
+            className="hover:opacity-60 transition-opacity cursor-pointer focus:outline-none"
+          >
+            Track Record
+          </button>
+          <span>,&nbsp;</span>
+          <button
+            onClick={() => setActiveModal('Experience')}
+            className="hover:opacity-60 transition-opacity cursor-pointer focus:outline-none"
+          >
+            Experience
+          </button>
+          <span>,&nbsp;</span>
+          <button
+            onClick={() => setActiveModal('P&L Metrics')}
+            className="hover:opacity-60 transition-opacity cursor-pointer focus:outline-none"
+          >
+            P&L Metrics
+          </button>
+          <span>,&nbsp;</span>
+          <button
+            onClick={() => setActiveModal('Leadership')}
+            className="hover:opacity-60 transition-opacity cursor-pointer focus:outline-none"
+          >
+            Leadership
+          </button>
         </nav>
 
-        <div className="flex items-center gap-2">
-          <Button asChild className="rounded-full px-5 gap-2 h-9">
-            <a href={RESUME_URL} download="Naresh-Singh-Bhau-Resume.pdf">
-              <Download className="w-4 h-4" /> Resume
-            </a>
-          </Button>
-          <button
-            onClick={() => setOpen((o) => !o)}
-            aria-expanded={open}
-            aria-controls="mobile-nav"
-            aria-label="Menu"
-            className="lg:hidden w-10 h-10 inline-flex items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        {/* Desktop CTA (right, hidden below md) */}
+        <div className="hidden md:flex items-center gap-6">
+          <a
+            href="/resume/Naresh-Singh-Bhau-Resume.pdf"
+            download="Naresh-Singh-Bhau-Resume.pdf"
+            className="text-[21px] lg:text-[23px] text-white underline underline-offset-2 hover:opacity-60 transition-opacity cursor-pointer focus:outline-none"
           >
-            {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            Download Resume
+          </a>
+          <button
+            onClick={() => setActiveModal('Get in touch')}
+            className="text-[21px] lg:text-[23px] text-white/80 hover:text-white underline underline-offset-2 hover:opacity-60 transition-opacity cursor-pointer focus:outline-none"
+          >
+            Contact
           </button>
         </div>
-      </div>
 
-      <AnimatePresence>
-        {open && (
-          <motion.nav
-            key="mobile-nav"
-            id="mobile-nav"
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2, ease: EASE }}
-            className="lg:hidden absolute top-full inset-x-0 mx-4 mt-2 rounded-2xl border border-white/10 bg-card/95 backdrop-blur-xl p-3"
-            aria-label="Mobile"
-          >
-            {NAV_LINKS.map((l) => (
-              <button
-                key={l.target}
-                onClick={() => scrollTo(l.target)}
-                className={`w-full text-left px-4 py-3 text-sm rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 ${
-                  active === l.target
-                    ? 'text-foreground bg-white/5'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
-                }`}
-              >
-                {l.label}
-              </button>
-            ))}
-          </motion.nav>
-        )}
-      </AnimatePresence>
-    </motion.header>
-  )
-}
-
-// ─── HERO ───
-function Hero() {
-  const reduce = useReducedMotion()
-  const scrollTo = (id: string) =>
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
-
-  return (
-    <section id="hero" className="relative min-h-[100dvh] flex items-center overflow-hidden pt-24">
-      {/* Atmosphere */}
-      <div className="absolute inset-0 pointer-events-none" aria-hidden>
-        <div
-          className="absolute -top-32 -right-24 w-[42rem] h-[42rem] bg-primary/5 rounded-full blur-[140px]"
-          style={reduce ? undefined : { animation: 'float 9s ease-in-out infinite' }}
-        />
-        <div
-          className="absolute bottom-0 -left-32 w-[30rem] h-[30rem] bg-primary/[0.03] rounded-full blur-[120px]"
-          style={reduce ? undefined : { animation: 'float 12s ease-in-out infinite reverse' }}
-        />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,hsl(220_15%_6%)_78%)]" />
-      </div>
-
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-[1.4fr_1fr] gap-12 lg:gap-8 items-center w-full">
-        {/* Copy */}
-        <div>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: EASE }}
-            className="mb-6"
-          >
-            <span className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-primary/25 bg-primary/10 text-primary text-sm font-medium">
-              <span className="relative flex w-2 h-2">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-75 animate-ping" />
-                <span className="relative inline-flex rounded-full w-2 h-2 bg-primary" />
-              </span>
-              Open to pan-India & global roles · Office, hybrid or remote
-            </span>
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 28 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
-            className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tighter leading-[1.04] mb-6"
-          >
-            Naresh <span className="text-gradient italic">Singh Bhau</span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.22, ease: EASE }}
-            className="text-lg md:text-xl lg:text-2xl text-muted-foreground leading-relaxed max-w-2xl mb-8"
-          >
-            B2B revenue leader scaling MSME & enterprise sales teams — ₹3Cr+ monthly
-            revenue, 18%+ YoY growth, multi-million-rupee deal closures, and regional
-            P&amp;L ownership.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.34, ease: EASE }}
-            className="flex flex-wrap items-center gap-4"
-          >
-            <Button asChild size="lg" className="rounded-full px-7 h-12 gap-2 text-base">
-              <a href={RESUME_URL} download="Naresh-Singh-Bhau-Resume.pdf">
-                <Download className="w-5 h-5" /> Download Resume
-              </a>
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="rounded-full px-7 h-12 gap-2 text-base border-white/15 bg-background/40 hover:bg-white/5"
-              onClick={() => scrollTo('experience')}
-            >
-              View Experience <ArrowRight className="w-4 h-4" />
-            </Button>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-            className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-sm text-muted-foreground"
-          >
-            <a href="tel:+919901935806" className="inline-flex items-center gap-2 hover:text-foreground transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background">
-              <Phone className="w-4 h-4 text-primary" /> +91-9901 935 806
-            </a>
-            <a href="mailto:nareshbhau1993@gmail.com" className="inline-flex items-center gap-2 hover:text-foreground transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background">
-              <Mail className="w-4 h-4 text-primary" /> nareshbhau1993@gmail.com
-            </a>
-            <a
-              href="https://www.linkedin.com/in/nareshsinghbhau"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 hover:text-foreground transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-            >
-              <Linkedin className="w-4 h-4 text-primary" /> LinkedIn
-            </a>
-            <span className="inline-flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-primary" /> Jaipur, Rajasthan
-            </span>
-          </motion.div>
-        </div>
-
-        {/* Visual: metric panel */}
-        <motion.aside
-          initial={{ opacity: 0, x: 40 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.9, delay: 0.3, ease: EASE }}
-          className="relative"
+        {/* Mobile hamburger (visible below md) */}
+        <button
+          type="button"
+          onClick={() => setMobileMenuOpen((prev) => !prev)}
+          className="md:hidden flex flex-col justify-center items-center gap-[5px] p-2 focus:outline-none z-30 cursor-pointer rounded-lg bg-black/40 backdrop-blur-md"
+          aria-label="Toggle navigation menu"
+          aria-expanded={mobileMenuOpen}
         >
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl overflow-hidden glow-amber relative">
-            <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-primary/10 blur-[70px]" aria-hidden />
-            <div className="grid grid-cols-2 divide-x divide-y divide-white/[0.07]">
-              {stats.map((s) => (
-                <div key={s.label} className="p-6 md:p-8">
-                  <s.icon className="w-5 h-5 text-primary mb-3" />
-                  <div className="font-display text-4xl md:text-[2.5rem] font-bold text-gradient leading-none mb-2">
-                    {s.value}
-                  </div>
-                  <div className="text-sm text-muted-foreground leading-snug">{s.label}</div>
-                </div>
-              ))}
-            </div>
-            <a
-              href="https://www.linkedin.com/in/nareshsinghbhau"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="border-t border-white/[0.07] px-6 py-4 flex items-center justify-between text-xs group/cert hover:bg-white/[0.02] transition-colors rounded-b-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/50"
-            >
-              <span className="text-muted-foreground inline-flex items-center gap-1.5">
-                <BadgeCheck className="w-4 h-4 text-primary" /> Insight Alpha — Industry Expert
-              </span>
-              <ArrowUpRight className="w-4 h-4 text-primary/70 group-hover/cert:translate-x-0.5 group-hover/cert:-translate-y-0.5 transition-transform" />
-            </a>
-          </div>
-        </motion.aside>
-      </div>
-
-      {/* Scroll cue */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.4, duration: 1 }}
-        className="absolute bottom-7 left-1/2 -translate-x-1/2"
-        aria-hidden
-      >
-        <motion.div
-          animate={reduce ? undefined : { y: [0, 8, 0] }}
-          transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
-          className="w-6 h-10 rounded-full border border-white/20 flex items-start justify-center p-2"
-        >
-          <div className="w-1 h-2 rounded-full bg-primary/70" />
-        </motion.div>
-      </motion.div>
-    </section>
-  )
-}
-
-// ─── MARQUEE ───
-function Marquee() {
-  const reduce = useReducedMotion()
-  const items = reduce ? skillsMarquee : [...skillsMarquee, ...skillsMarquee]
-  return (
-    <section className="border-y border-white/[0.07] py-5 overflow-hidden" aria-hidden>
-      <div
-        className="flex gap-10 whitespace-nowrap w-max"
-        style={
-          reduce
-            ? undefined
-            : { animation: 'marquee 40s linear infinite' }
-        }
-      >
-        {items.map((item, i) => (
-          <span key={i} className="inline-flex items-center gap-10 text-sm text-muted-foreground">
-            {item}
-            <span className="text-white/20">✳</span>
-          </span>
-        ))}
-      </div>
-    </section>
-  )
-}
-
-// ─── ABOUT ───
-function About() {
-  return (
-    <section id="about" className="py-24 md:py-32">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-[1fr_1.6fr] gap-12">
-        <div className="lg:sticky lg:top-28 self-start">
-          <SectionLabel num="01">Profile</SectionLabel>
-          <h2 className="font-display text-3xl md:text-4xl font-bold tracking-tight leading-[1.1]">
-            The operator behind
-            <br />
-            the growth curve.
-          </h2>
-        </div>
-
-        <div className="space-y-6 text-muted-foreground text-lg leading-relaxed">
-          <p className="text-xl text-foreground/90">
-            Revenue-focused B2B sales leader with{' '}
-            <span className="text-foreground font-medium">8+ years</span> building and scaling
-            MSME and enterprise sales teams across India.
-          </p>
-          <p>
-            Proven track record of delivering <span className="text-foreground font-medium">18%+ YoY growth</span>,
-            managing <span className="text-foreground font-medium">₹3Cr+ in monthly regional revenue</span>, closing
-            multi-million-rupee deals, and launching new markets from the ground up.
-          </p>
-          <p>
-            Hands-on regional <span className="text-foreground font-medium">P&amp;L ownership</span> — spanning revenue
-            growth, cost optimisation, customer retention, and productivity-led profitability. Equally strong in
-            consultative selling, key account management, customer success, and leadership development.
-          </p>
-
-          <motion.div
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: '-80px' }}
-            className="pt-6 grid sm:grid-cols-3 gap-4"
-          >
-            {[
-              { k: '36', v: 'sales executives coached & led' },
-              { k: '9', v: 'managers reporting in' },
-              { k: '3', v: 'branch managers developed' },
-            ].map((m, i) => (
-              <motion.div
-                key={m.k}
-                custom={i}
-                variants={reveal}
-                className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-5"
-              >
-                <div className="font-display text-2xl font-bold text-gradient mb-1">{m.k}</div>
-                <div className="text-sm text-muted-foreground leading-snug">{m.v}</div>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-// ─── STATS: metric wall (plain, typographic) ───
-function MetricWall() {
-  return (
-    <section aria-label="Metric highlights" className="border-y border-white/[0.07]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 divide-y divide-white/[0.07]">
-        {[
-          ['₹3Cr+', 'average monthly regional revenue', 'managed at IndiaMART'],
-          ['18%+', 'YoY revenue growth', 'delivered consistently'],
-          ['₹94 L', 'largest single B2B deal', 'multi-million-rupee, consultative'],
-          ['65%+', 'customer retention', 'predictable renewals YoY'],
-          ['6,000+', 'paid B2B accounts', 'opened & scaled in Jaipur'],
-        ].map(([n, l, d], i) => (
-          <motion.div
-            key={n}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: '-60px' }}
-            custom={i}
-            variants={reveal}
-            className="grid md:grid-cols-[220px_1fr] gap-2 md:gap-10 items-baseline py-8 md:py-10 group"
-          >
-            <div className="font-mono text-3xl md:text-4xl font-semibold text-gradient tracking-tight group-hover:translate-x-1 transition-transform">
-              {n}
-            </div>
-            <div>
-              <div className="text-foreground/90 text-lg font-medium mb-1">{l}</div>
-              <div className="text-muted-foreground">{d}</div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-    </section>
-  )
-}
-
-// ─── EXPERIENCE (timeline) ───
-function Experience() {
-  return (
-    <section id="experience" className="py-24 md:py-32">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <SectionLabel num="02">Experience</SectionLabel>
-        <SectionHead
-          title={<>From direct sales to regional P&amp;L ownership.</>}
-          lead="A proven track record of turning sales teams into revenue engines — and sales leaders into managers."
-        />
-
-        <div className="relative">
-          <div
-            className="absolute left-5 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-primary/60 via-primary/20 to-transparent"
-            aria-hidden
+          <span
+            className={`w-6 h-[2px] bg-white transition-all duration-300 origin-center ${
+              mobileMenuOpen ? 'rotate-45 translate-y-[7px]' : ''
+            }`}
           />
-          <div className="space-y-14 md:space-y-20">
-            {experience.map((exp, i) => (
-              <motion.article
-                key={exp.company}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true, margin: '-100px' }}
-                custom={i}
-                variants={reveal}
-                className={`relative grid md:grid-cols-2 gap-4 md:gap-0`}
-              >
-                <span
-                  className="absolute left-5 md:left-1/2 -translate-x-1/2 top-1 w-3 h-3 rounded-full bg-primary ring-4 ring-background"
-                  aria-hidden
-                />
-                <div className={i % 2 === 0 ? 'pl-12 md:pl-0 md:pr-16 md:text-right' : 'pl-12 md:pl-16 md:col-start-2'}>
-                  <span className="inline-flex items-center gap-2 font-mono text-xs tracking-[0.2em] text-primary mb-3">
-                    {exp.index}
-                    <span className="h-px w-8 bg-primary/40" />
-                    {exp.period}
-                  </span>
-                  <h3 className="font-display text-2xl md:text-3xl font-bold tracking-tight mb-1">
-                    {exp.company}
-                  </h3>
-                  <p className="text-primary font-medium mb-1 mt-2">
-                    {exp.role} <span className="text-muted-foreground font-normal">· {exp.sub}</span>
-                  </p>
-                  <p className="text-muted-foreground text-sm mb-5 inline-flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5" /> {exp.location}
-                  </p>
-                </div>
+          <span
+            className={`w-6 h-[2px] bg-white transition-all duration-300 ${
+              mobileMenuOpen ? 'opacity-0' : 'opacity-100'
+            }`}
+          />
+          <span
+            className={`w-6 h-[2px] bg-white transition-all duration-300 origin-center ${
+              mobileMenuOpen ? '-rotate-45 -translate-y-[7px]' : ''
+            }`}
+          />
+        </button>
+      </header>
 
-                <div className={i % 2 === 0 ? 'pl-12 md:pl-0 md:col-start-2' : 'pl-12 md:pl-0 md:row-start-1 md:pr-16 md:text-right'}>
-                  <ul className={`space-y-3 ${
-                    i % 2 === 1 ? 'md:flex md:flex-col md:items-end' : ''
-                  }`}>
-                    {exp.highlights.map((h, hi) => (
-                      <li
-                        key={hi}
-                        className="flex items-start gap-3 text-muted-foreground text-[15px] leading-relaxed"
-                      >
-                        <span
-                          className={`w-1.5 h-1.5 rounded-full bg-primary/70 mt-2.5 shrink-0 ${
-                            i % 2 === 1 ? 'md:order-2' : ''
-                          }`}
-                        />
-                        <span className={i % 2 === 1 ? 'md:text-right' : ''}>{h}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </motion.article>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-// ─── ACHIEVEMENTS (bento, asymmetric) ───
-function FeaturedTile({ a, large }: { a: (typeof achievements)[number]; large?: boolean }) {
-  return (
-    <motion.div
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, margin: '-80px' }}
-      variants={reveal}
-      className={`relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/15 to-transparent p-8 flex flex-col justify-end group ${
-        large ? 'md:col-span-2 md:row-span-2' : 'md:min-h-[168px]'
-      }`}
-    >
-      <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-primary/15 blur-[60px]" aria-hidden />
-      <span className="w-11 h-11 rounded-xl bg-primary text-primary-foreground flex items-center justify-center mb-6">
-        <Sparkles className="w-5 h-5" />
-      </span>
-      <span className="inline-flex w-fit px-3 py-1 rounded-full bg-background/60 border border-white/10 text-[11px] text-muted-foreground uppercase tracking-wider mb-3">
-        {a.tag}
-      </span>
-      <h3 className={`font-display font-bold tracking-tight mb-2 ${large ? 'text-3xl md:text-4xl' : 'text-2xl'}`}>
-        {a.title}
-      </h3>
-      <p className="text-muted-foreground max-w-md leading-relaxed">{a.desc}</p>
-    </motion.div>
-  )
-}
-
-function SmallTile({ a }: { a: (typeof achievements)[number] }) {
-  return (
-    <motion.div
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, margin: '-80px' }}
-      variants={reveal}
-      className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6 flex items-start gap-4 group hover:border-primary/30 hover:bg-white/[0.04] transition-all"
-    >
-      <span className="w-10 h-10 rounded-lg bg-white/5 text-muted-foreground flex items-center justify-center shrink-0 group-hover:bg-white/10 transition-colors">
-        <BadgeCheck className="w-5 h-5" />
-      </span>
-      <div>
-        <div className="font-display text-xl font-bold tracking-tight mb-1">{a.title}</div>
-        <p className="text-sm text-muted-foreground leading-relaxed">{a.desc}</p>
-      </div>
-    </motion.div>
-  )
-}
-
-function Achievements() {
-  const [big, f2] = achievements.filter((a) => a.featured)
-  const [r0, ...bottom] = achievements.filter((a) => !a.featured)
-  return (
-    <section id="achievements" className="py-24 md:py-32 bg-white/[0.015] border-y border-white/[0.07]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <SectionLabel num="03">Track Record</SectionLabel>
-        <div className="mb-14">
-          <h2 className="font-display text-3xl md:text-5xl font-bold tracking-tight leading-[1.08]">
-            Proof, not promises.
-          </h2>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-4 md:gap-5">
-          <FeaturedTile a={big} large />
-          <FeaturedTile a={f2} />
-          <SmallTile a={r0} />
-          {bottom.map((a) => (
-            <SmallTile key={a.title} a={a} />
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
-// ─── CAPABILITIES (numbered list) ───
-function Capabilities() {
-  return (
-    <section id="capabilities" className="py-24 md:py-32">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-[1fr_1.8fr] gap-12">
-        <div className="lg:sticky lg:top-28 self-start">
-          <SectionLabel num="04">Capabilities</SectionLabel>
-          <h2 className="font-display text-3xl md:text-4xl font-bold tracking-tight leading-[1.1] mb-6">
-            How I drive revenue — end to end.
-          </h2>
-          <p className="text-muted-foreground leading-relaxed max-w-sm">
-            A full-stack sales-operating capability — from front-line deal execution to P&amp;L,
-            hiring, and go-to-market strategy.
-          </p>
-        </div>
-
-        <div className="grid sm:grid-cols-2 gap-x-6 gap-y-0">
-          {competencies.map((c, i) => (
-            <motion.div
-              key={c.skill}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, margin: '-60px' }}
-              custom={i}
-              variants={reveal}
-              className="border-t border-white/[0.08] py-6 group"
-            >
-              <div className="flex items-baseline gap-4">
-                <span className="font-mono text-sm text-primary/60">{String(i + 1).padStart(2, '0')}</span>
-                <div>
-                  <h3 className="text-lg font-semibold tracking-tight group-hover:text-primary transition-colors mb-1">
-                    {c.skill}
-                  </h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">{c.note}</p>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
-// ─── INDUSTRY EXPERT (full-width band) ───
-function IndustryExpert() {
-  return (
-    <section className="relative overflow-hidden border-y border-primary/20">
-      <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.06] via-primary/[0.03] to-transparent" aria-hidden />
-      <div className="absolute -top-20 right-1/4 w-72 h-72 rounded-full bg-primary/[0.05] blur-[90px]" aria-hidden />
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-28 grid lg:grid-cols-[auto_1fr] gap-10 items-center">
-        <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center glow-amber shrink-0">
-          <Sparkles className="w-10 h-10" />
-        </div>
-        <div>
-          <span className="font-mono text-xs tracking-[0.25em] text-primary mb-4 block">
-            SELECTED INDUSTRY EXPERT · INSIGHT ALPHA
-          </span>
-          <h2 className="font-display text-3xl md:text-5xl font-bold tracking-tight leading-[1.08] mb-6">
-            Selected to advise on B2B SaaS &amp; revenue.
-          </h2>
-          <p className="text-muted-foreground text-lg leading-relaxed max-w-2xl">
-            Providing strategic insights on enterprise sales, go-to-market strategy, revenue scaling,
-            customer acquisition &amp; retention, and regional P&amp;L leadership.
-          </p>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-// ─── EDUCATION ───
-function Education() {
-  return (
-    <section className="py-24 md:py-28">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <SectionLabel num="05">Foundation</SectionLabel>
-        <SectionHead title={<>Education &amp; background.</>} />
-        <div className="grid md:grid-cols-2 gap-4 md:gap-6 max-w-4xl">
-          {education.map((e, i) => (
-            <motion.div
-              key={e.degree}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, margin: '-60px' }}
-              custom={i}
-              variants={reveal}
-              className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-7 md:p-9 flex items-start gap-5 hover:border-primary/30 transition-all group"
-            >
-              <span className="w-11 h-11 rounded-xl bg-white/5 text-muted-foreground flex items-center justify-center shrink-0 group-hover:bg-white/10 transition-colors">
-                <GraduationCap className="w-5 h-5" />
-              </span>
-              <div>
-                <h3 className="font-display text-xl md:text-2xl font-bold tracking-tight mb-1">{e.degree}</h3>
-                <p className="text-muted-foreground">{e.school}</p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
-// ─── CONTACT / FOOTER ───
-function Contact() {
-  const [showTop, setShowTop] = useState(false)
-  useEffect(() => {
-    const onScroll = () => setShowTop(window.scrollY > 500)
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
-
-  return (
-    <footer id="contact" className="relative border-t border-white/[0.07] overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,hsla(38,92%,50%,0.05),transparent_60%)]" aria-hidden />
-      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 py-24 md:py-32 text-center">
-        <motion.div
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: '-80px' }}
-          variants={reveal}
+      {/* Mobile overlay menu (z-index: 19) */}
+      <div
+        className={`fixed inset-0 z-[19] bg-black/95 backdrop-blur-xl flex flex-col justify-center px-8 gap-7 transition-opacity duration-300 md:hidden ${
+          mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        <button
+          onClick={() => {
+            setMobileMenuOpen(false);
+            setActiveModal('Track Record');
+          }}
+          className="text-left text-[30px] font-medium text-white hover:opacity-60 transition-opacity focus:outline-none"
         >
-          <h2 className="font-display text-4xl md:text-6xl font-bold tracking-tight leading-[1.05] mb-6">
-            Let's build your next
+          Track Record
+        </button>
+        <button
+          onClick={() => {
+            setMobileMenuOpen(false);
+            setActiveModal('Experience');
+          }}
+          className="text-left text-[30px] font-medium text-white hover:opacity-60 transition-opacity focus:outline-none"
+        >
+          Experience
+        </button>
+        <button
+          onClick={() => {
+            setMobileMenuOpen(false);
+            setActiveModal('P&L Metrics');
+          }}
+          className="text-left text-[30px] font-medium text-white hover:opacity-60 transition-opacity focus:outline-none"
+        >
+          P&L Metrics
+        </button>
+        <button
+          onClick={() => {
+            setMobileMenuOpen(false);
+            setActiveModal('Leadership');
+          }}
+          className="text-left text-[30px] font-medium text-white hover:opacity-60 transition-opacity focus:outline-none"
+        >
+          Leadership
+        </button>
+        <div className="h-[1px] bg-white/20 my-2" />
+        <a
+          href="/resume/Naresh-Singh-Bhau-Resume.pdf"
+          download="Naresh-Singh-Bhau-Resume.pdf"
+          className="text-left text-[30px] font-medium text-white underline underline-offset-4 hover:opacity-60 transition-opacity focus:outline-none"
+        >
+          Download Resume (PDF)
+        </a>
+        <button
+          onClick={() => {
+            setMobileMenuOpen(false);
+            setActiveModal('Get in touch');
+          }}
+          className="text-left text-[30px] font-medium text-white/80 hover:text-white transition-opacity focus:outline-none"
+        >
+          Get in touch
+        </button>
+      </div>
+
+      {/* HERO SECTION (z-index: 10) */}
+      <section className="relative z-10 w-full min-h-screen flex flex-col justify-end pb-10 sm:pb-12 md:justify-center md:pb-0 px-5 sm:px-8 md:px-12 overflow-hidden">
+        {/* Content container: max-w-xl, relative z-10 */}
+        <div className="max-w-xl relative z-10 select-text">
+          {/* 1. Blurred intro label */}
+          <div
+            className="pointer-events-none select-none mb-5 sm:mb-6"
+            style={{
+              fontSize: 'clamp(18px, 4vw, 26px)',
+              lineHeight: 1.3,
+              fontWeight: 400,
+              color: '#fff',
+              filter: 'blur(4px)',
+            }}
+          >
+            Hey there, meet Naresh Singh Bhau,
             <br />
-            <span className="text-gradient italic">revenue milestone.</span>
-          </h2>
-          <p className="text-muted-foreground text-lg mb-10 max-w-xl mx-auto leading-relaxed">
-            Open to pan-India and global roles — office, hybrid, or remote.
-            Ready when you are.
+            B2B Revenue Leader · Regional P&L & Enterprise Growth
+          </div>
+
+          {/* 2. Typewriter text */}
+          <p
+            className="text-white mb-5 sm:mb-6 font-normal min-h-[58px]"
+            style={{
+              fontSize: 'clamp(18px, 4vw, 26px)',
+              lineHeight: 1.35,
+              fontWeight: 400,
+            }}
+          >
+            {displayed}
+            {!done && (
+              <span
+                className="inline-block w-[2px] h-[1.1em] bg-white align-middle ml-[2px] animate-blink"
+                aria-hidden="true"
+              />
+            )}
           </p>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 mb-12">
-            <Button asChild size="lg" className="rounded-full px-7 h-12 gap-2 text-base">
-              <a href={RESUME_URL} download="Naresh-Singh-Bhau-Resume.pdf">
-                <Download className="w-5 h-5" /> Download Resume
-              </a>
-            </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="rounded-full px-7 h-12 gap-2 text-base border-white/15 hover:bg-white/5"
+          {/* 3. Action pill buttons */}
+          <div
+            className="flex flex-wrap gap-y-1 relative"
+            style={{
+              opacity: pillsVisible ? 1 : 0,
+              transform: pillsVisible ? 'translateY(0)' : 'translateY(8px)',
+              transition: 'opacity 0.4s ease, transform 0.4s ease',
+            }}
+          >
+            {/* White pill buttons */}
+            <button
+              type="button"
+              onClick={() => setActiveModal('P&L Metrics')}
+              className="inline-flex items-center justify-center bg-white text-black border border-black/10 rounded-full text-[13px] sm:text-[15px] px-4 sm:px-5 py-[0.3em] mx-[0.2em] mb-[0.4em] whitespace-nowrap hover:bg-black hover:text-white transition-colors duration-200 cursor-pointer focus:outline-none"
             >
-              <a href="mailto:nareshbhau1993@gmail.com">
-                <Mail className="w-5 h-5" /> Email Me
-              </a>
-            </Button>
-          </div>
+              ₹3Cr+ Monthly Revenue
+            </button>
 
-          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-sm">
-            <a href="tel:+919901935806" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background">
-              <Phone className="w-4 h-4 text-primary" /> +91-9901 935 806
-            </a>
-            <a href="mailto:nareshbhau1993@gmail.com" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background">
-              <Mail className="w-4 h-4 text-primary" /> nareshbhau1993@gmail.com
-            </a>
+            <button
+              type="button"
+              onClick={() => setActiveModal('Track Record')}
+              className="inline-flex items-center justify-center bg-white text-black border border-black/10 rounded-full text-[13px] sm:text-[15px] px-4 sm:px-5 py-[0.3em] mx-[0.2em] mb-[0.4em] whitespace-nowrap hover:bg-black hover:text-white transition-colors duration-200 cursor-pointer focus:outline-none"
+            >
+              ₹94 Lakh Deal
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveModal('Leadership')}
+              className="inline-flex items-center justify-center bg-white text-black border border-black/10 rounded-full text-[13px] sm:text-[15px] px-4 sm:px-5 py-[0.3em] mx-[0.2em] mb-[0.4em] whitespace-nowrap hover:bg-black hover:text-white transition-colors duration-200 cursor-pointer focus:outline-none"
+            >
+              50+ Member Org
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveModal('Experience')}
+              className="inline-flex items-center justify-center bg-white text-black border border-black/10 rounded-full text-[13px] sm:text-[15px] px-4 sm:px-5 py-[0.3em] mx-[0.2em] mb-[0.4em] whitespace-nowrap hover:bg-black hover:text-white transition-colors duration-200 cursor-pointer focus:outline-none"
+            >
+              Experience & Roles
+            </button>
+
             <a
-              href="https://www.linkedin.com/in/nareshsinghbhau"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              href="/resume/Naresh-Singh-Bhau-Resume.pdf"
+              download="Naresh-Singh-Bhau-Resume.pdf"
+              className="inline-flex items-center justify-center bg-white text-black border border-black/10 rounded-full text-[13px] sm:text-[15px] px-4 sm:px-5 py-[0.3em] mx-[0.2em] mb-[0.4em] whitespace-nowrap hover:bg-black hover:text-white transition-colors duration-200 cursor-pointer focus:outline-none"
             >
-              <Linkedin className="w-4 h-4 text-primary" /> LinkedIn
+              Download Resume (PDF)
             </a>
-            <span className="inline-flex items-center gap-2 text-muted-foreground">
-              <MapPin className="w-4 h-4 text-primary" /> Jaipur, Rajasthan
-            </span>
+
+            {/* 1 outline pill button: Email with copy icon */}
+            <button
+              type="button"
+              onClick={handleCopyEmail}
+              title="Click to copy email address"
+              className="inline-flex items-center justify-center text-white bg-transparent border border-white rounded-full text-[13px] sm:text-[15px] px-4 sm:px-5 py-[0.3em] mx-[0.2em] mb-[0.4em] whitespace-nowrap gap-2 sm:gap-3 hover:bg-white hover:text-black transition-colors duration-200 cursor-pointer focus:outline-none group relative"
+            >
+              <span>
+                Reach me:{' '}
+                <span className="underline underline-offset-1">nareshbhau1993@gmail.com</span>
+              </span>
+
+              {/* Small 12x12 copy icon */}
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="shrink-0 transition-transform group-hover:scale-105"
+                aria-hidden="true"
+              >
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              </svg>
+
+              {/* Copied toast tooltip */}
+              {copied && (
+                <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-white text-black text-[11px] font-medium px-2 py-0.5 rounded shadow pointer-events-none whitespace-nowrap">
+                  Copied!
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Interactive Cursor Indicator Badge */}
+        <div className="hidden lg:flex items-center gap-3 absolute bottom-6 right-8 text-xs text-white/50 bg-black/40 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10 pointer-events-none">
+          <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span>Move cursor to pivot 3D figure</span>
+          <span className="font-mono text-white/80">{cursorProgress}%</span>
+        </div>
+
+        {/* Scroll cue button */}
+        <div className="w-full flex justify-center pb-2 pt-6 md:absolute md:bottom-5 md:left-0 md:pb-0">
+          <button
+            onClick={() => scrollToSection('dossier-overview')}
+            className="flex items-center gap-2 text-xs uppercase tracking-widest text-white/50 hover:text-white transition-colors cursor-pointer focus:outline-none"
+          >
+            <span>Explore Full Dossier</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M7 13l5 5 5-5M7 6l5 5 5-5"/>
+            </svg>
+          </button>
+        </div>
+      </section>
+
+      {/* FULL RESUME DOSSIER SECTIONS (SCROLLABLE) */}
+      <div id="dossier-overview" className="relative z-10 bg-[#07080a] border-t border-white/10 text-white">
+        {/* SECTION 1: EXECUTIVE LEDGER / METRIC WALL */}
+        <section className="max-w-6xl mx-auto px-5 sm:px-8 py-20 border-b border-white/10">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+            <div>
+              <span className="text-xs uppercase tracking-widest text-white/40 block mb-2 font-mono">
+                01 / OPERATOR PROOF
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-medium tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
+                Verifiable P&L & Scale
+              </h2>
+            </div>
+            <p className="text-sm text-white/60 max-w-md">
+              Evidence over adjectives. Every headline figure is audited and grounded in regional sales P&L leadership.
+            </p>
           </div>
 
-          <div className="mt-14 pt-8 border-t border-white/[0.07] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
-            <span>© {new Date().getFullYear()} Naresh Singh Bhau. All rights reserved.</span>
-            <span className="font-mono tracking-wide">BUILT TO CONVERT · LIKE THE DEALS I CLOSE</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="p-6 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-white/30 transition-all">
+              <div className="text-3xl sm:text-4xl font-medium text-white mb-2 font-mono">₹3Cr+</div>
+              <div className="text-sm font-medium text-white/90 mb-1">Average Monthly Revenue</div>
+              <div className="text-xs text-white/50 leading-relaxed">
+                Direct regional sales leadership at IndiaMART InterMESH Ltd.
+              </div>
+            </div>
+
+            <div className="p-6 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-white/30 transition-all">
+              <div className="text-3xl sm:text-4xl font-medium text-white mb-2 font-mono">₹94 Lakh</div>
+              <div className="text-sm font-medium text-white/90 mb-1">Largest Closed Deal</div>
+              <div className="text-xs text-white/50 leading-relaxed">
+                High-ticket enterprise contract negotiated and closed with multi-stakeholder approval.
+              </div>
+            </div>
+
+            <div className="p-6 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-white/30 transition-all">
+              <div className="text-3xl sm:text-4xl font-medium text-white mb-2 font-mono">50+ Team</div>
+              <div className="text-sm font-medium text-white/90 mb-1">Sales Headcount Led</div>
+              <div className="text-xs text-white/50 leading-relaxed">
+                3 Branch Managers, 9 Managers, and 36 Executives under direct reporting span.
+              </div>
+            </div>
+
+            <div className="p-6 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-white/30 transition-all">
+              <div className="text-3xl sm:text-4xl font-medium text-white mb-2 font-mono">18%+ YoY</div>
+              <div className="text-sm font-medium text-white/90 mb-1">Consistent Revenue Growth</div>
+              <div className="text-xs text-white/50 leading-relaxed">
+                Compound regional year-on-year revenue expansion across key manufacturing & B2B verticals.
+              </div>
+            </div>
+
+            <div className="p-6 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-white/30 transition-all">
+              <div className="text-3xl sm:text-4xl font-medium text-white mb-2 font-mono">6,000+</div>
+              <div className="text-sm font-medium text-white/90 mb-1">Paid B2B Accounts</div>
+              <div className="text-xs text-white/50 leading-relaxed">
+                Acquired and expanded during branch inception and scaleup in Jaipur.
+              </div>
+            </div>
+
+            <div className="p-6 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-white/30 transition-all">
+              <div className="text-3xl sm:text-4xl font-medium text-white mb-2 font-mono">65%+</div>
+              <div className="text-sm font-medium text-white/90 mb-1">YoY Client Retention</div>
+              <div className="text-xs text-white/50 leading-relaxed">
+                Predictable renewals, low churn, and deep account management health.
+              </div>
+            </div>
           </div>
-        </motion.div>
+        </section>
+
+        {/* SECTION 2: PROFESSIONAL EXPERIENCE */}
+        <section className="max-w-6xl mx-auto px-5 sm:px-8 py-20 border-b border-white/10">
+          <div className="mb-14">
+            <span className="text-xs uppercase tracking-widest text-white/40 block mb-2 font-mono">
+              02 / CAREER TRAJECTORY
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-medium tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
+              Work Experience
+            </h2>
+          </div>
+
+          <div className="space-y-12">
+            {/* Experience 1: IndiaMART RM */}
+            <div className="relative pl-6 sm:pl-8 border-l border-white/20">
+              <div className="absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full bg-white" />
+              <div className="flex flex-col sm:flex-row sm:items-baseline justify-between mb-2">
+                <div>
+                  <h3 className="text-xl sm:text-2xl font-medium text-white">Regional Manager</h3>
+                  <div className="text-sm text-white/70">IndiaMART InterMESH Ltd. · Jaipur, Rajasthan</div>
+                </div>
+                <span className="text-xs font-mono text-white/50 mt-1 sm:mt-0">Jul 2022 – Present</span>
+              </div>
+              <p className="text-sm text-white/80 leading-relaxed mb-4">
+                Promoted to youngest Regional Manager in the region. Full P&L responsibility for Jaipur and surrounding territories, scaling regional bookings to ₹3Cr+ per month.
+              </p>
+              <ul className="space-y-2 text-xs sm:text-sm text-white/60">
+                <li className="flex items-start gap-2">
+                  <span className="text-white/40 font-mono">→</span>
+                  <span>Directly lead a 50+ member sales organization (3 Branch Managers, 9 Managers, 36 Executives).</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-white/40 font-mono">→</span>
+                  <span>Structured enterprise sales motions, closing deals up to ₹94 Lakhs with MSME and industrial conglomerates.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-white/40 font-mono">→</span>
+                  <span>Maintained 65%+ annual customer retention rate through proactive service reviews and account health frameworks.</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Experience 2: IndiaMART BM */}
+            <div className="relative pl-6 sm:pl-8 border-l border-white/20">
+              <div className="absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full bg-white/40" />
+              <div className="flex flex-col sm:flex-row sm:items-baseline justify-between mb-2">
+                <div>
+                  <h3 className="text-xl sm:text-2xl font-medium text-white">Branch Manager</h3>
+                  <div className="text-sm text-white/70">IndiaMART InterMESH Ltd.</div>
+                </div>
+                <span className="text-xs font-mono text-white/50 mt-1 sm:mt-0">Jul 2019 – Jun 2022</span>
+              </div>
+              <p className="text-sm text-white/80 leading-relaxed mb-4">
+                Built and managed sales branch from inception, opening 6,000+ paid B2B customer accounts and driving 2× branch revenue growth.
+              </p>
+              <ul className="space-y-2 text-xs sm:text-sm text-white/60">
+                <li className="flex items-start gap-2">
+                  <span className="text-white/40 font-mono">→</span>
+                  <span>Recruited, trained, and mentored junior reps into top-tier performers across Rajasthan.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-white/40 font-mono">→</span>
+                  <span>Exceeded quarterly targets continuously, securing rapid promotion to Regional Manager.</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Experience 3: BYJU'S */}
+            <div className="relative pl-6 sm:pl-8 border-l border-white/20">
+              <div className="absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full bg-white/40" />
+              <div className="flex flex-col sm:flex-row sm:items-baseline justify-between mb-2">
+                <div>
+                  <h3 className="text-xl sm:text-2xl font-medium text-white">Senior Business Development Associate</h3>
+                  <div className="text-sm text-white/70">BYJU'S (Think & Learn Pvt. Ltd.)</div>
+                </div>
+                <span className="text-xs font-mono text-white/50 mt-1 sm:mt-0">May 2017 – Jul 2019</span>
+              </div>
+              <p className="text-sm text-white/80 leading-relaxed mb-4">
+                Direct B2C/B2B consultative sales. Generated ₹1Cr+ revenue in the first 7 months and achieved permanent role conversion in just 3 months.
+              </p>
+              <ul className="space-y-2 text-xs sm:text-sm text-white/60">
+                <li className="flex items-start gap-2">
+                  <span className="text-white/40 font-mono">→</span>
+                  <span>Ranked among the top 1% business development associates across North India.</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 3: LEADERSHIP & CORE COMPETENCIES */}
+        <section className="max-w-6xl mx-auto px-5 sm:px-8 py-20 border-b border-white/10">
+          <div className="mb-12">
+            <span className="text-xs uppercase tracking-widest text-white/40 block mb-2 font-mono">
+              03 / CAPABILITIES
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-medium tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
+              Operating Pillars
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="space-y-3 p-6 rounded-2xl border border-white/10 bg-white/[0.02]">
+              <span className="text-xs font-mono text-white/40">01</span>
+              <h3 className="text-lg font-medium text-white">P&L & Revenue Architecture</h3>
+              <p className="text-sm text-white/60 leading-relaxed">
+                Owning top-line and bottom-line outcomes. Budgeting, quota allocation, discounting discipline, and margin protection across all sales tiers.
+              </p>
+            </div>
+
+            <div className="space-y-3 p-6 rounded-2xl border border-white/10 bg-white/[0.02]">
+              <span className="text-xs font-mono text-white/40">02</span>
+              <h3 className="text-lg font-medium text-white">High-Velocity Sales Teams</h3>
+              <p className="text-sm text-white/60 leading-relaxed">
+                Systematic talent acquisition, onboarding bootcamps, and daily pipeline choreography. Proven record retaining 90%+ of core leadership.
+              </p>
+            </div>
+
+            <div className="space-y-3 p-6 rounded-2xl border border-white/10 bg-white/[0.02]">
+              <span className="text-xs font-mono text-white/40">03</span>
+              <h3 className="text-lg font-medium text-white">Enterprise Negotiations</h3>
+              <p className="text-sm text-white/60 leading-relaxed">
+                Direct engagement with CXOs, owners, and procurement boards. Closing multi-year, multi-million-rupee partnerships up to ₹94 Lakhs.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 4: EDUCATION & CONTACT FOOTER */}
+        <footer className="max-w-6xl mx-auto px-5 sm:px-8 py-20">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div>
+              <span className="text-xs uppercase tracking-widest text-white/40 block mb-2 font-mono">
+                04 / CREDENTIALS & INQUIRIES
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-medium tracking-tight mb-4" style={{ fontFamily: 'var(--font-heading)' }}>
+                Built to Convert. Like the Deals I Close.
+              </h2>
+              <p className="text-sm text-white/70 leading-relaxed mb-6">
+                Open to senior revenue leadership roles (VP Sales, Head of Revenue, Regional Director) and strategic advisory across India & globally.
+              </p>
+
+              <div className="space-y-2 text-sm text-white/80">
+                <div className="flex items-center gap-3">
+                  <span className="text-white/40 w-16 text-xs uppercase font-mono">Email:</span>
+                  <a href="mailto:nareshbhau1993@gmail.com" className="underline hover:text-white">
+                    nareshbhau1993@gmail.com
+                  </a>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-white/40 w-16 text-xs uppercase font-mono">Phone:</span>
+                  <a href="tel:+919901935806" className="underline hover:text-white">
+                    +91 9901 935 806
+                  </a>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-white/40 w-16 text-xs uppercase font-mono">Degree:</span>
+                  <span>B.E. Civil Engineering · Chandigarh University</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-white/40 w-16 text-xs uppercase font-mono">Base:</span>
+                  <span>Jaipur, India · Open to Pan-India & Global Relocation</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-8 rounded-3xl border border-white/20 bg-white/[0.03] space-y-6 text-center md:text-left">
+              <h3 className="text-xl font-medium">Download Official Executive Resume</h3>
+              <p className="text-xs sm:text-sm text-white/60">
+                Complete career chronicle with detailed territory metrics, promotion recommendations, and enterprise deal breakdowns.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <a
+                  href="/resume/Naresh-Singh-Bhau-Resume.pdf"
+                  download="Naresh-Singh-Bhau-Resume.pdf"
+                  className="px-6 py-3.5 rounded-full bg-white text-black font-medium text-sm hover:bg-white/90 text-center transition-colors"
+                >
+                  Download PDF Resume
+                </a>
+                <button
+                  onClick={handleCopyEmail}
+                  className="px-6 py-3.5 rounded-full border border-white/30 text-white font-medium text-sm hover:bg-white hover:text-black text-center transition-colors"
+                >
+                  {copied ? 'Email Copied!' : 'Copy Direct Email'}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-20 pt-8 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center text-xs text-white/40 gap-4">
+            <div>© {new Date().getFullYear()} Naresh Singh Bhau. All rights reserved.</div>
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="hover:text-white transition-colors cursor-pointer"
+            >
+              Back to top ↑
+            </button>
+          </div>
+        </footer>
       </div>
 
-      {showTop && (
-        <motion.button
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.8 }}
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-6 right-6 w-11 h-11 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors z-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-          aria-label="Back to top"
+      {/* INTERACTIVE DOSSIER MODAL SHEET */}
+      {activeModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-fade-in"
+          onClick={() => setActiveModal(null)}
         >
-          <ChevronUp className="w-5 h-5" />
-        </motion.button>
-      )}
-    </footer>
-  )
-}
+          <div
+            className="bg-[#0b0c0e] border border-white/20 rounded-2xl max-w-xl w-full p-6 sm:p-8 text-white relative shadow-2xl max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <span className="text-xs uppercase tracking-widest text-white/40 block mb-1 font-mono">
+                  Naresh Singh Bhau · Portfolio Dossier
+                </span>
+                <h2 className="text-2xl font-medium tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
+                  {activeModal}
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveModal(null)}
+                className="p-1.5 rounded-full hover:bg-white/10 transition-colors text-white/70 hover:text-white focus:outline-none cursor-pointer"
+                aria-label="Close modal"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
 
-// ─── PAGE ───
-export default function Home() {
-  return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden selection:bg-primary/30 selection:text-foreground">
-      <Nav />
-      <Hero />
-      <Marquee />
-      <About />
-      <MetricWall />
-      <Experience />
-      <Achievements />
-      <Capabilities />
-      <IndustryExpert />
-      <Education />
-      <Contact />
+            {/* Modal Content Branches */}
+            {activeModal === 'P&L Metrics' && (
+              <div className="space-y-5">
+                <p className="text-sm text-white/80 leading-relaxed">
+                  Direct revenue leadership across Rajasthan with proven P&L performance:
+                </p>
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/5">
+                    <div className="text-2xl font-mono font-medium text-white">₹3Cr+</div>
+                    <div className="text-xs text-white/50 mt-1">Monthly Regional Revenue</div>
+                  </div>
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/5">
+                    <div className="text-2xl font-mono font-medium text-white">18%+</div>
+                    <div className="text-xs text-white/50 mt-1">Consistent YoY Growth</div>
+                  </div>
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/5">
+                    <div className="text-2xl font-mono font-medium text-white">65%+</div>
+                    <div className="text-xs text-white/50 mt-1">Client Retention Rate</div>
+                  </div>
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/5">
+                    <div className="text-2xl font-mono font-medium text-white">6,000+</div>
+                    <div className="text-xs text-white/50 mt-1">Paid B2B Accounts</div>
+                  </div>
+                </div>
+                <div className="pt-2">
+                  <a
+                    href="/resume/Naresh-Singh-Bhau-Resume.pdf"
+                    download="Naresh-Singh-Bhau-Resume.pdf"
+                    className="block w-full py-3 text-center bg-white text-black font-medium rounded-full text-sm hover:bg-white/90 transition-colors"
+                  >
+                    Download Full P&L Breakdown (PDF)
+                  </a>
+                </div>
+              </div>
+            )}
+
+            {activeModal === 'Track Record' && (
+              <div className="space-y-4">
+                <p className="text-sm text-white/80 leading-relaxed">
+                  Key milestones spanning 8+ years of high-ticket B2B enterprise sales and team scale:
+                </p>
+                <div className="space-y-3 pt-1">
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/5">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-base font-medium">₹94 Lakh Single Enterprise Deal</span>
+                      <span className="text-xs font-mono text-white/50">High-Ticket</span>
+                    </div>
+                    <p className="text-xs text-white/60">
+                      Closed largest single contract in the territory by orchestrating multi-stakeholder procurement and customized service level agreements.
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/5">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-base font-medium">Youngest Regional Manager</span>
+                      <span className="text-xs font-mono text-white/50">IndiaMART</span>
+                    </div>
+                    <p className="text-xs text-white/60">
+                      Promoted from Branch Manager to Regional Manager after launching the branch and doubling regional revenue within 3 years.
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/5">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-base font-medium">Top 1% BDA Recognition</span>
+                      <span className="text-xs font-mono text-white/50">BYJU'S</span>
+                    </div>
+                    <p className="text-xs text-white/60">
+                      Generated ₹1Cr+ revenue in the initial 7 months with conversion to permanent role in 3 months.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeModal === 'Experience' && (
+              <div className="space-y-5">
+                <div className="space-y-4">
+                  <div className="border-l-2 border-white/30 pl-4 py-1">
+                    <div className="flex justify-between">
+                      <strong className="text-white text-base">Regional Manager</strong>
+                      <span className="text-xs font-mono text-white/50">2022 – Present</span>
+                    </div>
+                    <div className="text-xs text-white/70">IndiaMART InterMESH Ltd.</div>
+                    <p className="text-xs text-white/60 mt-1.5">
+                      Leading 50+ sales personnel across 3 branches, driving ₹3Cr+ monthly revenue and ₹94L deals.
+                    </p>
+                  </div>
+
+                  <div className="border-l-2 border-white/30 pl-4 py-1">
+                    <div className="flex justify-between">
+                      <strong className="text-white text-base">Branch Manager</strong>
+                      <span className="text-xs font-mono text-white/50">2019 – 2022</span>
+                    </div>
+                    <div className="text-xs text-white/70">IndiaMART InterMESH Ltd.</div>
+                    <p className="text-xs text-white/60 mt-1.5">
+                      Built the branch from scratch, acquiring 6,000+ paid B2B clients and achieving 2× revenue growth.
+                    </p>
+                  </div>
+
+                  <div className="border-l-2 border-white/30 pl-4 py-1">
+                    <div className="flex justify-between">
+                      <strong className="text-white text-base">Senior Business Development Associate</strong>
+                      <span className="text-xs font-mono text-white/50">2017 – 2019</span>
+                    </div>
+                    <div className="text-xs text-white/70">BYJU'S (Think & Learn Pvt. Ltd.)</div>
+                    <p className="text-xs text-white/60 mt-1.5">
+                      Consultative sales across northern territories; generated ₹1Cr+ in first 7 months.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <a
+                    href="/resume/Naresh-Singh-Bhau-Resume.pdf"
+                    download="Naresh-Singh-Bhau-Resume.pdf"
+                    className="block w-full py-3 text-center bg-white text-black font-medium rounded-full text-sm hover:bg-white/90 transition-colors"
+                  >
+                    Download Complete Resume (PDF)
+                  </a>
+                </div>
+              </div>
+            )}
+
+            {activeModal === 'Leadership' && (
+              <div className="space-y-4">
+                <p className="text-sm text-white/80 leading-relaxed">
+                  How Naresh scales and governs high-performance revenue organizations:
+                </p>
+                <div className="space-y-3">
+                  <div className="p-3.5 rounded-xl border border-white/10 bg-white/5">
+                    <div className="text-sm font-medium text-white mb-0.5">50+ Organization Hierarchy</div>
+                    <p className="text-xs text-white/60">
+                      Span of control spanning 3 Branch Managers, 9 Team Managers, and 36 Frontline Sales Executives.
+                    </p>
+                  </div>
+                  <div className="p-3.5 rounded-xl border border-white/10 bg-white/5">
+                    <div className="text-sm font-medium text-white mb-0.5">Predictable Pipeline Cadence</div>
+                    <p className="text-xs text-white/60">
+                      Weekly pipeline stress-tests, conversion velocity tracking, and deal desk oversight on high-ticket renewals.
+                    </p>
+                  </div>
+                  <div className="p-3.5 rounded-xl border border-white/10 bg-white/5">
+                    <div className="text-sm font-medium text-white mb-0.5">Talent Development & Retention</div>
+                    <p className="text-xs text-white/60">
+                      Promoted over 12 executives into management roles; maintained industry-leading retention across sales managers.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeModal === 'Get in touch' && (
+              <div className="space-y-5">
+                <p className="text-sm text-white/80 leading-relaxed">
+                  Available for confidential conversations regarding Head of Sales, VP Revenue, or Regional Director opportunities.
+                </p>
+                <div className="space-y-3 pt-1">
+                  <a
+                    href="mailto:nareshbhau1993@gmail.com"
+                    className="flex items-center justify-between p-4 rounded-xl border border-white/10 bg-white/5 hover:border-white/30 transition-all group"
+                  >
+                    <div>
+                      <span className="text-xs font-mono uppercase text-white/50 block">Direct Email</span>
+                      <span className="text-sm sm:text-base font-medium text-white group-hover:underline">
+                        nareshbhau1993@gmail.com
+                      </span>
+                    </div>
+                    <span className="text-xs text-white/50">Send ↗</span>
+                  </a>
+
+                  <a
+                    href="tel:+919901935806"
+                    className="flex items-center justify-between p-4 rounded-xl border border-white/10 bg-white/5 hover:border-white/30 transition-all group"
+                  >
+                    <div>
+                      <span className="text-xs font-mono uppercase text-white/50 block">Phone</span>
+                      <span className="text-sm sm:text-base font-medium text-white group-hover:underline">
+                        +91 9901 935 806
+                      </span>
+                    </div>
+                    <span className="text-xs text-white/50">Call ↗</span>
+                  </a>
+
+                  <a
+                    href="https://linkedin.com/in/nareshsinghbhau"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between p-4 rounded-xl border border-white/10 bg-white/5 hover:border-white/30 transition-all group"
+                  >
+                    <div>
+                      <span className="text-xs font-mono uppercase text-white/50 block">LinkedIn Profile</span>
+                      <span className="text-sm sm:text-base font-medium text-white group-hover:underline">
+                        linkedin.com/in/nareshsinghbhau
+                      </span>
+                    </div>
+                    <span className="text-xs text-white/50">Connect ↗</span>
+                  </a>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    onClick={handleCopyEmail}
+                    className="w-full py-3 text-center border border-white/30 text-white font-medium rounded-full text-sm hover:bg-white hover:text-black transition-colors"
+                  >
+                    {copied ? 'Email Copied to Clipboard!' : 'Copy Email Address'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
-  )
+  );
 }
