@@ -5,17 +5,30 @@
 :root {
   --font-heading: 'HelveticaNowDisplay-Medium', 'Helvetica Neue', Arial, sans-serif;
   --font-body: 'HelveticaNowDisplayW01-Rg', 'Helvetica Neue', Arial, sans-serif;
+  --bg-base: #000000;
+  --bg-dossier: #07080a;
+}
+
+[data-theme='slate'] {
+  --bg-base: #0b1120;
+  --bg-dossier: #0f172a;
 }
 
 body {
   margin: 0;
   padding: 0;
   font-family: var(--font-body);
-  background-color: #000;
+  background-color: var(--bg-base);
   color: #fff;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.4s ease;
+}
+
+[data-theme='slate'] body {
+  background-color: #0b1120;
+  color: #f8fafc;
 }
 
 @keyframes blink {
@@ -36,12 +49,18 @@ body {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #000;
+  background: var(--bg-base);
 }
 ::-webkit-scrollbar-thumb {
   background: #262626;
   border-radius: 3px;
 }
+[data-theme='slate'] ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
 ::-webkit-scrollbar-thumb:hover {
   background: #404040;
+}
+[data-theme='slate'] ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
 }
